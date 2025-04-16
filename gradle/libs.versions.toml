@@ -1,9 +1,8 @@
 [versions]
 agp = "8.8.2"
-decompose = "3.3.0"
+datastorePreferences = "1.1.4"
 decomposeVersion = "3.3.0"
-hiltAndroidVersion = "2.51.1"
-hiltCompiler = "2.51.1"
+mvikotlin = "4.3.0"
 koinAndroidxCompose = "4.0.4"
 kotlin = "2.1.0"
 coreKtx = "1.15.0"
@@ -23,8 +22,13 @@ firebaseFirestore = "25.1.3"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decomposeVersion" }
+decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decomposeVersion" }
+mvikotlin-core = { group = "com.arkivanov.mvikotlin", name = "mvikotlin", version.ref = "mvikotlin" }
+mvikotlin-main = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-main", version.ref = "mvikotlin" }
+mvikotlin-coroutines = { group = "com.arkivanov.mvikotlin", name = "mvikotlin-extensions-coroutines", version.ref = "mvikotlin" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

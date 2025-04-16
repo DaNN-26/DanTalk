@@ -20,6 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "DanTalk"
-include(":app")
-include(":mvi")
-include(":network")
+include(":features")
+include(":core")
+include(":domain")
