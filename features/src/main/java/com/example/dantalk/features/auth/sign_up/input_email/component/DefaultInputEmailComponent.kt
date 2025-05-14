@@ -12,7 +12,6 @@ import com.example.domain.userdata.model.UserData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class DefaultInputEmailComponent(
@@ -20,7 +19,7 @@ class DefaultInputEmailComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val navigateNext: (UserData) -> Unit,
-    private val navigateToSignIn: () -> Unit
+    private val navigateToSignIn: () -> Unit,
 ) : ComponentContext by componentContext, InputEmailComponent {
 
     private val store = instanceKeeper.getStore {

@@ -5,35 +5,38 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.core.design.components.DialogueBox
 import com.example.core.design.components.snackbar.CustomSnackbarHost
 import com.example.core.design.components.topbar.ExtraTopBar
+import com.example.core.design.util.InputFormField
 import com.example.dantalk.features.auth.sign_up.input_password.component.InputPasswordComponent
+import com.example.dantalk.features.auth.sign_up.input_password.store.InputPasswordStore
 import com.example.dantalk.features.auth.sign_up.input_password.util.InputPasswordValidation
 import com.example.dantalk.features.auth.ui.components.AuthForm
-import com.example.dantalk.features.auth.ui.components.AuthFormField
 
 @Composable
 fun InputPasswordContent(
     component: InputPasswordComponent,
 ) {
-//    val state by component.state.subscribeAsState()
-//
-//    Content(
-//        onCompleteButtonClick = { component.processIntent(InputPasswordIntent.SignUp) },
-//        password = state.password,
-//        repeatablePassword = state.repeatablePassword,
-//        validation = state.validation,
-//        onPasswordChange = { component.processIntent(InputPasswordIntent.OnPasswordChange(it)) },
-//        onRepeatablePasswordChange = { component.processIntent(InputPasswordIntent.OnRepeatablePasswordChange(it)) },
-//        isLoading = state.isLoading,
-//        isSuccessful = state.isSuccessful,
-//        onDialogDismissRequest = { component.processIntent(InputPasswordIntent.NavigateToHome) },
-//        navigateBack = { component.processIntent(InputPasswordIntent.NavigateBack) }
-//    )
+    val state by component.state.collectAsState()
+
+    Content(
+        onCompleteButtonClick = { component.onIntent(InputPasswordStore.Intent.SignUp) },
+        password = state.password,
+        repeatablePassword = state.repeatablePassword,
+        validation = state.validation,
+        onPasswordChange = { component.onIntent(InputPasswordStore.Intent.OnPasswordChange(it)) },
+        onRepeatablePasswordChange = { component.onIntent(InputPasswordStore.Intent.OnRepeatablePasswordChange(it)) },
+        isLoading = state.isLoading,
+        isSuccessful = state.isSuccessful,
+        onDialogDismissRequest = { component.onIntent(InputPasswordStore.Intent.DismissDialog) },
+        navigateBack = { component.onIntent(InputPasswordStore.Intent.NavigateBack) }
+    )
 }
 
 @Composable
@@ -52,7 +55,7 @@ private fun Content(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val fields = listOf(
-        AuthFormField(
+        InputFormField(
             title = "Пароль",
             value = password,
             onValueChange = { onPasswordChange(it) },
@@ -65,7 +68,7 @@ private fun Content(
                 keyboardType = KeyboardType.Password
             )
         ),
-        AuthFormField(
+        InputFormField(
             title = "Повторите пароль",
             value = repeatablePassword,
             onValueChange = { onRepeatablePasswordChange(it) },

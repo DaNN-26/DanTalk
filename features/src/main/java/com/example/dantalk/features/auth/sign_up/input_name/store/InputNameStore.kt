@@ -1,7 +1,9 @@
 package com.example.dantalk.features.auth.sign_up.input_name.store
 
 import com.arkivanov.mvikotlin.core.store.Store
-import com.example.dantalk.features.auth.sign_up.input_name.store.InputNameStore.*
+import com.example.dantalk.features.auth.sign_up.input_name.store.InputNameStore.Intent
+import com.example.dantalk.features.auth.sign_up.input_name.store.InputNameStore.Label
+import com.example.dantalk.features.auth.sign_up.input_name.store.InputNameStore.State
 import com.example.domain.userdata.model.UserData
 
 interface InputNameStore : Store<Intent, State, Label> {
@@ -18,7 +20,7 @@ interface InputNameStore : Store<Intent, State, Label> {
         val firstname: String = "",
         val lastname: String = "",
         val patronymic: String = "",
-        val isEmptyFirstname: Boolean = false
+        val isEmptyFirstname: Boolean = false,
     )
 
     sealed interface Label {

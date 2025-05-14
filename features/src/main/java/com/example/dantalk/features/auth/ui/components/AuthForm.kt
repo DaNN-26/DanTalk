@@ -4,24 +4,23 @@ import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,27 +33,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.design.components.MainButton
-import com.example.core.design.components.snackbar.CustomSnackbarHost
-import com.example.core.design.components.topbar.ExtraTopBar
 import com.example.core.design.theme.DanTalkTheme
-
-data class AuthFormField(
-    val title: String,
-    val value: String,
-    val onValueChange: (String) -> Unit,
-    val isPassword: Boolean = false,
-    val isError: Boolean = false,
-    val keyboardOptions: KeyboardOptions = KeyboardOptions(
-        imeAction = ImeAction.Next,
-        keyboardType = KeyboardType.Text
-    ),
-)
+import com.example.core.design.util.InputFormField
 
 @Composable
 fun AuthForm(
     topBar: @Composable (() -> Unit)? = null,
     snackbarHost: @Composable () -> Unit,
-    fields: List<AuthFormField>,
+    fields: List<InputFormField>,
     onMainButtonClick: () -> Unit,
     onBottomTextButtonClick: (() -> Unit)? = null,
     title: Pair<String, String>,
@@ -64,7 +50,6 @@ fun AuthForm(
 ) {
     val orientation = LocalConfiguration.current.orientation
     val isPortrait = orientation == Configuration.ORIENTATION_PORTRAIT
-    val modifier = if (isPortrait) Modifier else Modifier.verticalScroll(rememberScrollState())
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -74,11 +59,17 @@ fun AuthForm(
         containerColor = DanTalkTheme.colors.singleTheme
     ) { contentPadding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
-                .windowInsetsPadding(if(topBar == null) WindowInsets.systemBars else WindowInsets(0.dp))
-                .padding(contentPadding)
-                .padding(horizontal = 20.dp, vertical = 10.dp),
+                .then(if(topBar == null) Modifier.statusBarsPadding() else Modifier)
+                .padding(horizontal = 20.dp, vertical = 10.dp)
+                .then(
+                    if (isPortrait) Modifier.padding(contentPadding)
+                    else Modifier
+                        .verticalScroll(rememberScrollState())
+                        .statusBarsPadding()
+                        .navigationBarsPadding()
+                ),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -133,7 +124,7 @@ private fun Title(
 @Composable
 private fun InputForm(
     onSignInButtonClick: () -> Unit,
-    fields: List<AuthFormField>,
+    fields: List<InputFormField>,
     isLoading: Boolean,
     buttonText: String,
 ) {

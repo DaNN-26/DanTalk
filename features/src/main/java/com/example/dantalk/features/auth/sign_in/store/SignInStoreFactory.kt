@@ -11,7 +11,6 @@ import com.example.dantalk.features.auth.sign_in.store.SignInStore.Intent
 import com.example.dantalk.features.auth.sign_in.store.SignInStore.Label
 import com.example.dantalk.features.auth.sign_in.store.SignInStore.State
 import com.example.dantalk.features.auth.sign_in.util.SignInValidation
-import com.example.domain.userdata.model.UserData
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
@@ -23,7 +22,7 @@ class SignInStoreFactory(
     private val factory: StoreFactory,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val userDataStore: UserDataStore
+    private val userDataStore: UserDataStore,
 ) {
     private sealed interface Msg {
         class OnEmailChange(val email: String) : Msg
@@ -46,7 +45,7 @@ class SignInStoreFactory(
                     onIntent<Intent.SignIn> {
                         validateInput(state().email, state().password)
                             .let { dispatch(Msg.UpdateValidation(it)) }
-                        if (state().validation != SignInValidation.Valid) return@onIntent
+                        if (state().validation !is SignInValidation.Valid) return@onIntent
                         dispatch(Msg.UpdateLoading(true))
                         launch { signIn() }
                     }
@@ -77,12 +76,12 @@ class SignInStoreFactory(
             else -> SignInValidation.Valid
         }
 
-    private suspend inline fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signIn() {
+    private suspend fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signIn() {
         withContext(Dispatchers.IO) {
             authRepository.login(state().email, state().password)
-        }.onSuccess {
+        }.onSuccess { user ->
+            saveUserData(user.uid)
             dispatch(Msg.UpdateLoading(isSuccessful = true))
-            saveUserData(it.uid)
         }.onFailure {
             val validation = when (it) {
                 is FirebaseNetworkException -> SignInValidation.NetworkError

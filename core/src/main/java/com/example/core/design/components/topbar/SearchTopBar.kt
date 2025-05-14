@@ -1,4 +1,4 @@
-package com.example.dantalk.features.main.search
+package com.example.core.design.components.topbar
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons

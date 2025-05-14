@@ -75,6 +75,7 @@ dependencies {
     //decompose
     implementation(libs.decompose)
     implementation(libs.decompose.extensions.compose)
+
     //icons
     implementation(libs.androidx.material.icons.extended)
 
@@ -85,4 +86,7 @@ dependencies {
     implementation(libs.mvikotlin.core)
     implementation(libs.mvikotlin.main)
     implementation(libs.mvikotlin.coroutines)
+
+    //shimmer
+    implementation(libs.compose.shimmer)
 }

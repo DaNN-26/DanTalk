@@ -12,12 +12,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.core.design.components.DialogueBox
 import com.example.core.design.components.snackbar.CustomSnackbarHost
+import com.example.core.design.util.InputFormField
 import com.example.dantalk.features.auth.sign_in.component.SignInComponent
 import com.example.dantalk.features.auth.sign_in.store.SignInStore
 import com.example.dantalk.features.auth.sign_in.util.SignInValidation
 import com.example.dantalk.features.auth.ui.components.AuthForm
-import com.example.dantalk.features.auth.ui.components.AuthFormField
-import kotlinx.coroutines.delay
 
 @Composable
 fun SignInContent(
@@ -55,7 +54,7 @@ private fun Content(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val fields = listOf(
-        AuthFormField(
+        InputFormField(
             title = "Email",
             value = email,
             onValueChange = { onEmailChange(it) },
@@ -68,7 +67,7 @@ private fun Content(
                 keyboardType = KeyboardType.Email
             )
         ),
-        AuthFormField(
+        InputFormField(
             title = "Пароль",
             value = password,
             onValueChange = { onPasswordChange(it) },

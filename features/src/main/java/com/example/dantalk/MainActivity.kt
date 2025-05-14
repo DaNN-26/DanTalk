@@ -9,6 +9,7 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.example.core.datastore.domain.UserDataStore
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.firebase.auth.domain.repository.AuthRepository
+import com.example.core.firebase.firestore.chat.domain.repository.ChatRepository
 import com.example.core.firebase.firestore.user.domain.repository.UserRepository
 import com.example.dantalk.features.root.RootContent
 import com.example.dantalk.features.root.component.DefaultRootComponent
@@ -23,6 +24,7 @@ class MainActivity : ComponentActivity() {
             storeFactory = DefaultStoreFactory(),
             authRepository = getKoin().get<AuthRepository>(),
             userRepository = getKoin().get<UserRepository>(),
+            chatRepository = getKoin().get<ChatRepository>(),
             userDataStore = getKoin().get<UserDataStore>()
         )
         enableEdgeToEdge()

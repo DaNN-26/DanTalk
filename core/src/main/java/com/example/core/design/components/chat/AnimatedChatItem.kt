@@ -112,7 +112,8 @@ private fun AnimatedChatItemAction(
     Box(
         modifier = Modifier
             .background(boxColor)
-            .padding(16.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
         IconButton(
             onClick = onDeleteIconClick,

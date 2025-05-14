@@ -1,11 +1,10 @@
 package com.example.dantalk.features.main.profile.component
 
-import com.arkivanov.decompose.value.Value
-import com.example.dantalk.mvi.main.profile.ProfileIntent
-import com.example.dantalk.mvi.main.profile.ProfileState
+import com.example.dantalk.features.main.profile.store.ProfileStore
+import kotlinx.coroutines.flow.StateFlow
 
 interface ProfileComponent {
-    val state: Value<ProfileState>
+    val state: StateFlow<ProfileStore.State>
 
-    fun processIntent(intent: ProfileIntent)
+    fun onIntent(intent: ProfileStore.Intent)
 }

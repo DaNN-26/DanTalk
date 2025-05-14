@@ -1,5 +1,6 @@
 [versions]
 agp = "8.8.2"
+composeShimmer = "1.3.2"
 datastorePreferences = "1.1.4"
 decomposeVersion = "3.3.0"
 mvikotlin = "4.3.0"
@@ -24,6 +25,7 @@ firebaseFirestore = "25.1.3"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
+compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version.ref = "composeShimmer" }
 decompose = { module = "com.arkivanov.decompose:decompose", version.ref = "decomposeVersion" }
 decompose-extensions-compose = { module = "com.arkivanov.decompose:extensions-compose", version.ref = "decomposeVersion" }
 mvikotlin-core = { group = "com.arkivanov.mvikotlin", name = "mvikotlin", version.ref = "mvikotlin" }
