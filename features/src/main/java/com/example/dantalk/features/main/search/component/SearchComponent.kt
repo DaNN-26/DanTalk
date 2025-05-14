@@ -1,11 +1,10 @@
 package com.example.dantalk.features.main.search.component
 
-import com.arkivanov.decompose.value.Value
-import com.example.dantalk.mvi.main.search.SearchIntent
-import com.example.dantalk.mvi.main.search.SearchState
+import com.example.dantalk.features.main.search.store.SearchStore
+import kotlinx.coroutines.flow.StateFlow
 
 interface SearchComponent {
-    val state: Value<SearchState>
+    val state: StateFlow<SearchStore.State>
 
-    fun processIntent(intent: SearchIntent)
+    fun onIntent(intent: SearchStore.Intent)
 }

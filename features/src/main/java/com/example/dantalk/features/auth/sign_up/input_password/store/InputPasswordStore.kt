@@ -21,7 +21,7 @@ interface InputPasswordStore : Store<Intent, State, Label> {
         val repeatablePassword: String = "",
         val validation: InputPasswordValidation = InputPasswordValidation.Valid,
         val isLoading: Boolean = false,
-        val isSuccessful: Boolean = false
+        val isSuccessful: Boolean = false,
     )
 
     sealed interface Label {

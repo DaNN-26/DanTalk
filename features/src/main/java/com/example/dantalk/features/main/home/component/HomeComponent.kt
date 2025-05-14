@@ -1,11 +1,10 @@
 package com.example.dantalk.features.main.home.component
 
-import com.arkivanov.decompose.value.Value
-import com.example.dantalk.mvi.main.home.HomeIntent
-import com.example.dantalk.mvi.main.home.HomeState
+import com.example.dantalk.features.main.home.store.HomeStore
+import kotlinx.coroutines.flow.StateFlow
 
 interface HomeComponent {
-    val state: Value<HomeState>
+    val state: StateFlow<HomeStore.State>
 
-    fun processIntent(intent: HomeIntent)
+    fun onIntent(intent: HomeStore.Intent)
 }

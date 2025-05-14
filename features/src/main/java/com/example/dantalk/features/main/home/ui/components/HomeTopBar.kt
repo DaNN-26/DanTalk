@@ -1,4 +1,4 @@
-package com.example.dantalk.features.main.home
+package com.example.dantalk.features.main.home.ui.components
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -13,6 +13,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.example.core.design.theme.DanTalkTheme
 
@@ -20,10 +22,16 @@ import com.example.core.design.theme.DanTalkTheme
 @Composable
 fun HomeTopBar(
     onMenuClick: () -> Unit,
-    onSearchClick: () -> Unit
+    onSearchClick: () -> Unit,
+    isScrollInInitialState: () -> Boolean,
 ) {
+    val elevation = if (isScrollInInitialState.invoke()) 0.dp else 4.dp
+    val topBarColor = if (isScrollInInitialState.invoke())
+        DanTalkTheme.colors.singleTheme else DanTalkTheme.colors.topBar
+
     TopAppBar(
         title = {},
+        modifier = Modifier.shadow(elevation),
         navigationIcon = {
             IconButton(
                 onClick = onMenuClick
@@ -45,7 +53,7 @@ fun HomeTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DanTalkTheme.colors.topBar,
+            containerColor = topBarColor,
             actionIconContentColor = DanTalkTheme.colors.oppositeTheme,
             navigationIconContentColor = DanTalkTheme.colors.oppositeTheme
         ),

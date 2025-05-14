@@ -60,6 +60,7 @@ class DefaultAuthComponent(
             storeFactory = storeFactory,
             authRepository = authRepository,
             userRepository = userRepository,
+            userDataStore = userDataStore,
             navigateToHome = navigateToHome,
             navigateToSignIn = { navigation.pop() }
         )

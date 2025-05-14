@@ -20,7 +20,7 @@ interface InputEmailStore : Store<Intent, State, Label> {
         val username: String = "",
         val email: String = "",
         val validation: InputEmailValidation = InputEmailValidation.Valid,
-        val isLoading: Boolean = false
+        val isLoading: Boolean = false,
     )
 
     sealed interface Label {

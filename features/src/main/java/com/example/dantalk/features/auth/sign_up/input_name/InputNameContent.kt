@@ -12,10 +12,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.core.design.components.snackbar.CustomSnackbarHost
 import com.example.core.design.components.topbar.ExtraTopBar
+import com.example.core.design.util.InputFormField
 import com.example.dantalk.features.auth.sign_up.input_name.component.InputNameComponent
 import com.example.dantalk.features.auth.sign_up.input_name.store.InputNameStore
 import com.example.dantalk.features.auth.ui.components.AuthForm
-import com.example.dantalk.features.auth.ui.components.AuthFormField
 
 @Composable
 fun InputNameContent(
@@ -51,7 +51,7 @@ private fun Content(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val fields = listOf(
-        AuthFormField(
+        InputFormField(
             title = "Имя",
             value = firstname,
             onValueChange = { onFirstnameChange(it) },
@@ -61,7 +61,7 @@ private fun Content(
                 keyboardType = KeyboardType.Text
             )
         ),
-        AuthFormField(
+        InputFormField(
             title = "Фамилия (опционально)",
             value = lastname,
             onValueChange = { onLastnameChange(it) },
@@ -70,7 +70,7 @@ private fun Content(
                 keyboardType = KeyboardType.Text
             )
         ),
-        AuthFormField(
+        InputFormField(
             title = "Отчество (опционально)",
             value = patronymic,
             onValueChange = { onPatronymicChange(it) },

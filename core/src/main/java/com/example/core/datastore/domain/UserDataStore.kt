@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface UserDataStore {
     val getUserData: Flow<UserData>
-
     suspend fun saveUserData(userData: UserData)
+    suspend fun clearUserData()
 }

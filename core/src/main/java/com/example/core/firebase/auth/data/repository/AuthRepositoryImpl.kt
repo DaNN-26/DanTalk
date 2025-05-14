@@ -13,14 +13,15 @@ import kotlin.coroutines.suspendCoroutine
 class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
 ) : AuthRepository {
-    override suspend fun createUser(email: String, password: String) {
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnSuccessListener {
-                val user = firebaseAuth.currentUser
-                Log.d("FirebaseAuth", user?.email ?: "Error")
-            }
-            .addOnFailureListener { /*TODO*/ }
-    }
+    override suspend fun createUser(email: String, password: String) : Result<FirebaseUser> =
+        suspendCoroutine { continuation ->
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+                    val user = firebaseAuth.currentUser
+                    if (user != null) continuation.resume(success(user))
+                }
+                .addOnFailureListener { continuation.resume(failure(it)) }
+        }
 
     override suspend fun login(email: String, password: String): Result<FirebaseUser> =
         suspendCoroutine { continuation ->
@@ -32,8 +33,7 @@ class AuthRepositoryImpl(
                 .addOnFailureListener { continuation.resume(failure(it)) }
         }
 
-    override fun getCurrentUser(): FirebaseUser {
-        Log.d("FirebaseAuth", firebaseAuth.currentUser?.email ?: "Error")
-        return firebaseAuth.currentUser ?: throw FirebaseException("User not found")
+    override suspend fun signOut() {
+        firebaseAuth.signOut()
     }
 }

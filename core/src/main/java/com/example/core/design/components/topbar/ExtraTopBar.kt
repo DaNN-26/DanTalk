@@ -2,6 +2,8 @@ package com.example.core.design.components.topbar
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
@@ -16,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.core.design.theme.DanTalkTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExtraTopBar(
     navigateBack: () -> Unit,
@@ -25,7 +26,7 @@ fun ExtraTopBar(
     IconButton(
         onClick = navigateBack,
         modifier = Modifier
-            .windowInsetsPadding(TopAppBarDefaults.windowInsets)
+            .statusBarsPadding()
             .padding(horizontal = 8.dp)
             .size(50.dp),
         colors = IconButtonDefaults.iconButtonColors(

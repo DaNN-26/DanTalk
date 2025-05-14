@@ -1,4 +1,4 @@
-package com.example.dantalk.features.main.home
+package com.example.dantalk.features.main.home.ui.components
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.design.theme.DanTalkTheme
+import com.example.domain.userdata.model.UserData
 
 @Composable
 fun HomeNavDrawer(
@@ -49,8 +50,7 @@ fun HomeNavDrawer(
     onInfoClick: () -> Unit,
     onSignOutClick: () -> Unit,
     @DrawableRes avatar: Int,
-    name: String,
-    email: String,
+    user: UserData,
     content: @Composable () -> Unit,
 ) {
     ModalNavigationDrawer(
@@ -63,8 +63,8 @@ fun HomeNavDrawer(
             ) {
                 NavDrawerHeader(
                     avatar = avatar,
-                    name = name,
-                    email = email
+                    name = user.firstname,
+                    email = user.email
                 )
                 Column(
                     modifier = Modifier.fillMaxHeight(),

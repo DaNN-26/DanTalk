@@ -1,7 +1,6 @@
 package com.example.datastore.data
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -43,6 +42,17 @@ class UserDataStoreImpl(private val context: Context) : UserDataStore {
             preferences[USER_FIRSTNAME] = userData.firstname
             preferences[USER_LASTNAME] = userData.lastname
             preferences[USER_PATRONYMIC] = userData.patronymic
+        }
+    }
+
+    override suspend fun clearUserData() {
+        context.dataStore.edit { preferences ->
+            preferences[USER_ID] = ""
+            preferences[USER_EMAIL] = ""
+            preferences[USER_USERNAME] = ""
+            preferences[USER_FIRSTNAME] = ""
+            preferences[USER_LASTNAME] = ""
+            preferences[USER_PATRONYMIC] = ""
         }
     }
 }

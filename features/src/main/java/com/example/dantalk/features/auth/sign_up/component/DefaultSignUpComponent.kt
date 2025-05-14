@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.example.core.datastore.domain.UserDataStore
 import com.example.core.firebase.auth.domain.repository.AuthRepository
 import com.example.core.firebase.firestore.user.domain.repository.UserRepository
 import com.example.dantalk.features.auth.sign_up.input_email.component.DefaultInputEmailComponent
@@ -20,6 +21,7 @@ class DefaultSignUpComponent(
     private val storeFactory: StoreFactory,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val userDataStore: UserDataStore,
     private val navigateToHome: () -> Unit,
     private val navigateToSignIn: () -> Unit,
 ) : ComponentContext by componentContext, SignUpComponent {
@@ -84,8 +86,10 @@ class DefaultSignUpComponent(
     ) =
         DefaultInputPasswordComponent(
             componentContext = componentContext,
+            storeFactory = storeFactory,
             authRepository = authRepository,
             userRepository = userRepository,
+            userDataStore = userDataStore,
             navigateToHome = navigateToHome,
             navigateBack = { navigation.pop() },
             currentUserData = config.userData

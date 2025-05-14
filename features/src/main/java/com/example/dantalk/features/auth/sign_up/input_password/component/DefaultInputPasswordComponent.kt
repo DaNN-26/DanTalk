@@ -1,74 +1,60 @@
 package com.example.dantalk.features.auth.sign_up.input_password.component
 
 import com.arkivanov.decompose.ComponentContext
+import com.arkivanov.mvikotlin.core.instancekeeper.getStore
+import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
+import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.example.core.datastore.domain.UserDataStore
 import com.example.core.firebase.auth.domain.repository.AuthRepository
 import com.example.core.firebase.firestore.user.domain.repository.UserRepository
+import com.example.dantalk.features.auth.sign_up.input_password.store.InputPasswordStore
+import com.example.dantalk.features.auth.sign_up.input_password.store.InputPasswordStoreFactory
 import com.example.domain.userdata.model.UserData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class DefaultInputPasswordComponent(
     componentContext: ComponentContext,
+    private val storeFactory: StoreFactory,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
+    private val userDataStore: UserDataStore,
+    private val currentUserData: UserData,
     private val navigateToHome: () -> Unit,
-    private val navigateBack: () -> Unit,
-    private val currentUserData: UserData
+    private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, InputPasswordComponent {
 
+    private val store = instanceKeeper.getStore {
+        InputPasswordStoreFactory(
+            factory = storeFactory,
+            authRepository = authRepository,
+            userRepository = userRepository,
+            userDataStore = userDataStore,
+            currentUserData = currentUserData
+        ).create()
+    }
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.Main)
 
-//
-//    private suspend fun checkPassword() = withContext(Dispatchers.Main) {
-//        val validation = when {
-//            state.value.password.isBlank() ->
-//                InputPasswordValidation.EmptyPassword
-//            state.value.password != state.value.repeatablePassword ->
-//                InputPasswordValidation.NotMatchesPasswords
-//
-//            else -> InputPasswordValidation.Valid
-//        }
-//        _state.update { it.copy(validation = validation) }
-//    }
-//
-//    private fun createUser(responseUserData: UserData) {
-//        scope.launch {
-//            checkPassword()
-//            if(state.value.validation != InputPasswordValidation.Valid) return@launch
-//            try {
-//                _state.update { it.copy(isLoading = true) }
-//                authRepository.createUser(
-//                    email = responseUserData.email,
-//                    password = state.value.password
-//                )
-//                userRepository.createUser(responseUserData)
-//                _state.update { it.copy(
-//                    isLoading = false,
-//                    isSuccessful = true
-//                ) }
-//            } catch (e: Exception) {
-//                val validation: InputPasswordValidation = when (e) {
-//                    is FirebaseAuthWeakPasswordException ->
-//                        InputPasswordValidation.PasswordIsTooShort
-//
-//                    is FirebaseNetworkException ->
-//                        InputPasswordValidation.NetworkError
-//
-//                    else -> InputPasswordValidation.NetworkError
-//                }
-//                Log.d("CreateUser", e.toString())
-//                _state.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        validation = validation
-//                    )
-//                }
-//            }
-//        }
-//    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val state = store.stateFlow
 
-    companion object {
-        const val INPUT_PASSWORD_COMPONENT = "INPUT_PASSWORD_COMPONENT"
+    override fun onIntent(intent: InputPasswordStore.Intent) {
+        store.accept(intent)
+    }
+
+    init {
+        scope.launch {
+            store.labels.collect { label ->
+                when (label) {
+                    is InputPasswordStore.Label.NavigateToHome -> navigateToHome()
+                    is InputPasswordStore.Label.NavigateBack -> navigateBack()
+                }
+            }
+        }
     }
 }

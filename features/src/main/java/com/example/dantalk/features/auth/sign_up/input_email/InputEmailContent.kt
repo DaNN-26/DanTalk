@@ -11,11 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.core.design.components.snackbar.CustomSnackbarHost
+import com.example.core.design.util.InputFormField
 import com.example.dantalk.features.auth.sign_up.input_email.component.InputEmailComponent
 import com.example.dantalk.features.auth.sign_up.input_email.store.InputEmailStore
 import com.example.dantalk.features.auth.sign_up.input_email.util.InputEmailValidation
 import com.example.dantalk.features.auth.ui.components.AuthForm
-import com.example.dantalk.features.auth.ui.components.AuthFormField
 
 @Composable
 fun InputEmailContent(
@@ -49,7 +49,7 @@ private fun Content(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val fields = listOf(
-        AuthFormField(
+        InputFormField(
             title = "Email",
             value = email,
             onValueChange = { onEmailChange(it) },
@@ -62,7 +62,7 @@ private fun Content(
                 keyboardType = KeyboardType.Email
             )
         ),
-        AuthFormField(
+        InputFormField(
             title = "Имя пользователя",
             value = username,
             onValueChange = { onUsernameChange(it) },
