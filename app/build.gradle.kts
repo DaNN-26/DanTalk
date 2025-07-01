@@ -46,7 +46,13 @@ val decomposeVersion: String by project
 
 dependencies {
     implementation(project(":core"))
-    implementation(project(":domain"))
+    implementation(project(":feature"))
+    implementation(project(":data"))
+
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.decompose)
+    implementation(libs.mvikotlin.core)
+    implementation(libs.mvikotlin.main)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -65,28 +71,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    //serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    //koin
-    implementation(libs.koin.androidx.compose)
-
-    //decompose
-    implementation(libs.decompose)
-    implementation(libs.decompose.extensions.compose)
-
-    //icons
-    implementation(libs.androidx.material.icons.extended)
-
-    //datastore
-    implementation(libs.androidx.datastore.preferences)
-
-    //mvikotlin
-    implementation(libs.mvikotlin.core)
-    implementation(libs.mvikotlin.main)
-    implementation(libs.mvikotlin.coroutines)
-
-    //shimmer
-    implementation(libs.compose.shimmer)
 }

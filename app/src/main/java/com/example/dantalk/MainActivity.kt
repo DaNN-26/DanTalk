@@ -6,13 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import com.example.core.datastore.domain.UserDataStore
-import com.example.dantalk.design.theme.DanTalkTheme
-import com.example.core.firebase.auth.domain.repository.AuthRepository
-import com.example.core.firebase.firestore.chat.domain.repository.ChatRepository
-import com.example.core.firebase.firestore.user.domain.repository.UserRepository
-import com.example.dantalk.features.root.RootContent
-import com.example.dantalk.features.root.component.DefaultRootComponent
+import com.example.core.design.theme.DanTalkTheme
+import com.example.data.auth.api.AuthRepository
+import com.example.data.chat.api.ChatRepository
+import com.example.data.user.api.UserDataStoreRepository
+import com.example.data.user.api.UserRepository
+import com.example.feature.root.RootContent
+import com.example.feature.root.component.DefaultRootComponent
 import org.koin.android.ext.android.getKoin
 import org.koin.androidx.compose.KoinAndroidContext
 
@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
             authRepository = getKoin().get<AuthRepository>(),
             userRepository = getKoin().get<UserRepository>(),
             chatRepository = getKoin().get<ChatRepository>(),
-            userDataStore = getKoin().get<UserDataStore>()
+            userDataStoreRepository = getKoin().get<UserDataStoreRepository>()
         )
         enableEdgeToEdge()
         setContent {
