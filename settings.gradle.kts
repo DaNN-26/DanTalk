@@ -22,4 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "DanTalk"
 include(":app")
 include(":core")
-include(":domain")
+include(":feature")
+include(":data")

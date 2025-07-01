@@ -2,8 +2,6 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-
-    kotlin("plugin.serialization") version "2.1.10"
 }
 
 android {
@@ -36,7 +34,8 @@ android {
 }
 
 dependencies {
-    implementation(project(":domain"))
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.compose.shimmer)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -55,16 +54,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    //serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    //icons
-    implementation(libs.androidx.material.icons.extended)
-
-    //datastore
-    implementation(libs.androidx.datastore.preferences)
-
-    //shimmer
-    implementation(libs.compose.shimmer)
 }

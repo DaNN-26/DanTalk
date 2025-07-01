@@ -1,9 +1,7 @@
 package com.example.dantalk
 
 import android.app.Application
-import com.example.dantalk.di.firebase.AuthModule
-import com.example.dantalk.di.firebase.FirestoreModule
-import com.example.dantalk.di.datastore.DatastoreModule
+import com.example.data.di.*
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
