@@ -1,6 +1,6 @@
 package com.example.core.firebase.firestore.user.domain.repository
 
-import com.example.domain.userdata.model.UserData
+import com.example.domain.model.userdata.UserData
 import com.google.firebase.firestore.DocumentReference
 
 interface UserRepository {

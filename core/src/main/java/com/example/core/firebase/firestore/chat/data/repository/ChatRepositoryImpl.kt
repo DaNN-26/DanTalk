@@ -2,9 +2,9 @@ package com.example.core.firebase.firestore.chat.data.repository
 
 import android.util.Log
 import com.example.core.firebase.firestore.chat.domain.repository.ChatRepository
-import com.example.domain.chat.model.Chat
-import com.example.domain.message.model.Message
-import com.example.domain.userdata.model.UserData
+import com.example.domain.model.chat.Chat
+import com.example.domain.model.message.Message
+import com.example.domain.model.userdata.UserData
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope

@@ -59,9 +59,6 @@ dependencies {
     //serialization
     implementation(libs.kotlinx.serialization.json)
 
-    //koin
-    implementation(libs.koin.androidx.compose)
-
     //icons
     implementation(libs.androidx.material.icons.extended)
 

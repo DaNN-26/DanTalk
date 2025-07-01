@@ -1,6 +1,6 @@
 package com.example.core.datastore.domain
 
-import com.example.domain.userdata.model.UserData
+import com.example.domain.model.userdata.UserData
 import kotlinx.coroutines.flow.Flow
 
 interface UserDataStore {

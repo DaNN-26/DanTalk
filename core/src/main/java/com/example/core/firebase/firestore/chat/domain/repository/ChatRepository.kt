@@ -1,7 +1,6 @@
 package com.example.core.firebase.firestore.chat.domain.repository
 
-import com.example.domain.chat.model.Chat
-import com.example.domain.userdata.model.UserData
+import com.example.domain.model.chat.Chat
 import com.google.firebase.firestore.DocumentReference
 
 interface ChatRepository {

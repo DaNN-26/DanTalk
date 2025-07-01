@@ -2,7 +2,7 @@ package com.example.core.firebase.firestore.user.data.repository
 
 import android.util.Log
 import com.example.core.firebase.firestore.user.domain.repository.UserRepository
-import com.example.domain.userdata.model.UserData
+import com.example.domain.model.userdata.UserData
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
