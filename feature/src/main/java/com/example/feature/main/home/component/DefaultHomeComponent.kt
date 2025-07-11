@@ -26,6 +26,7 @@ class DefaultHomeComponent(
     private val navigateToProfile: () -> Unit,
     private val navigateToPeople: () -> Unit,
     private val navigateToAuth: () -> Unit,
+    private val navigateToChat: (id: String) -> Unit
 ) : ComponentContext by componentContext, HomeComponent {
 
     private val store = instanceKeeper.getStore {
@@ -54,6 +55,7 @@ class DefaultHomeComponent(
                     is HomeStore.Label.NavigateToProfile -> navigateToProfile()
                     is HomeStore.Label.NavigateToPeople -> navigateToPeople()
                     is HomeStore.Label.NavigateToAuth -> navigateToAuth()
+                    is HomeStore.Label.NavigateToChat -> navigateToChat(label.id)
                 }
             }
         }

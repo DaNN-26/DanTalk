@@ -11,6 +11,10 @@ import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.feature.main.chat.ChatContent
+import com.example.feature.main.chat.component.ChatComponent
+import com.example.feature.main.chat.component.DefaultChatComponent
+import com.example.feature.main.chat.store.ChatStoreFactory
 import com.example.feature.root.RootContent
 import com.example.feature.root.component.DefaultRootComponent
 import org.koin.android.ext.android.getKoin

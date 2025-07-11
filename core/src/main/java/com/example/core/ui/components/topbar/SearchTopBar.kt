@@ -1,4 +1,4 @@
-package com.example.core.design.components.topbar
+package com.example.core.ui.components.topbar
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,7 +18,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
-import com.example.core.design.components.MainTextField
+import com.example.core.ui.components.MainTextField
 import com.example.core.design.theme.DanTalkTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

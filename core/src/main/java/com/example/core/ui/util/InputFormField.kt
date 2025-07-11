@@ -1,4 +1,4 @@
-package com.example.core.design.util
+package com.example.core.ui.util
 
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.ImeAction

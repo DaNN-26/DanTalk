@@ -25,7 +25,7 @@ internal class UserDataStoreRepositoryImpl(private val context: Context) : UserD
 
     override val getUserData: Flow<UserData> = context.dataStore.data.map { preferences ->
         UserData(
-            userId = preferences[USER_ID] ?: "",
+            id = preferences[USER_ID] ?: "",
             email = preferences[USER_EMAIL] ?: "",
             username = preferences[USER_USERNAME] ?: "",
             firstname = preferences[USER_FIRSTNAME] ?: "",
@@ -36,7 +36,7 @@ internal class UserDataStoreRepositoryImpl(private val context: Context) : UserD
 
     override suspend fun saveUserData(userData: UserData) {
         context.dataStore.edit { preferences ->
-            preferences[USER_ID] = userData.userId
+            preferences[USER_ID] = userData.id
             preferences[USER_EMAIL] = userData.email
             preferences[USER_USERNAME] = userData.username
             preferences[USER_FIRSTNAME] = userData.firstname

@@ -57,7 +57,7 @@ class ProfileStoreFactory(
                                     .let { dispatch(Msg.UpdateValidation(it)) }
                                 if (state().validation !is ProfileValidation.Valid) return@launch
                                 val newUserData = state().newUserData.copy(
-                                    userId = state().currentUser!!.userId
+                                    id = state().currentUser!!.id
                                 )
                                 saveNewUserData(newUserData)
                             }

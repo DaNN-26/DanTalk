@@ -34,12 +34,12 @@ internal class AuthRepositoryImpl(
                 }
         }
 
-    override suspend fun login(email: String, password: String): Result<String> =
+    override suspend fun login(email: String, password: String): String =
         suspendCoroutine { continuation ->
             firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnSuccessListener { task ->
                     val user = task.user
-                    if (user != null) continuation.resume(success(user.uid))
+                    if (user != null) continuation.resume(user.uid)
                 }
                 .addOnFailureListener {
                     continuation.resumeWithException(

@@ -10,10 +10,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import com.example.core.design.components.DialogueBox
-import com.example.core.design.components.snackbar.CustomSnackbarHost
-import com.example.core.design.components.topbar.ExtraTopBar
-import com.example.core.design.util.InputFormField
+import com.example.core.ui.components.DialogueBox
+import com.example.core.ui.components.snackbar.CustomSnackbarHost
+import com.example.core.ui.components.topbar.ExtraTopBar
+import com.example.core.ui.util.InputFormField
 import com.example.feature.auth.sign_up.input_password.component.InputPasswordComponent
 import com.example.feature.auth.sign_up.input_password.store.InputPasswordStore
 import com.example.feature.auth.sign_up.input_password.util.InputPasswordValidation

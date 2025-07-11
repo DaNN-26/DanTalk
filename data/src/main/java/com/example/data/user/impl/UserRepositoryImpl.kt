@@ -18,7 +18,7 @@ internal class UserRepositoryImpl(
             "lastname" to userData.lastname,
             "patronymic" to userData.patronymic
         )
-        firestore.collection("users").document(userData.userId)
+        firestore.collection("users").document(userData.id)
             .set(data)
             .addOnSuccessListener { Log.d("UserRepository", "createUser: $data") }
             .addOnFailureListener { Log.d("UserRepository", "exception: ${it.message}") }
@@ -32,7 +32,7 @@ internal class UserRepositoryImpl(
                 .addOnSuccessListener {
                     if (it != null) {
                         val response = it.toObject(UserData::class.java)!!
-                        val userData = response.copy(userId = userId)
+                        val userData = response.copy(id = userId)
                         continuation.resume(userData)
                     }
                 }
@@ -68,7 +68,7 @@ internal class UserRepositoryImpl(
                 .addOnSuccessListener { document ->
                     if (document != null && document.documents.isNotEmpty()) {
                         val users = document.documents.map {
-                            it.toObject(UserData::class.java)!!.copy(userId = it.id)
+                            it.toObject(UserData::class.java)!!.copy(id = it.id)
                         }
                         continuation.resume(users)
                     } else
@@ -88,7 +88,7 @@ internal class UserRepositoryImpl(
             "lastname" to userData.lastname,
             "patronymic" to userData.patronymic
         )
-        firestore.collection("users").document(userData.userId)
+        firestore.collection("users").document(userData.id)
             .update(data)
             .addOnSuccessListener { Log.d("UserRepository", "updateUser: $data") }
             .addOnFailureListener { Log.d("UserRepository", "exception: ${it.message}") }

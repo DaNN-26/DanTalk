@@ -100,7 +100,7 @@ class InputPasswordStoreFactory(
     }
 
     private suspend fun saveUserData(userId: String) = withContext(Dispatchers.IO) {
-        val userData = currentUserData.copy(userId = userId)
+        val userData = currentUserData.copy(id = userId)
         userRepository.createUser(userData)
         userDataStoreRepository.saveUserData(userData)
     }

@@ -3,22 +3,33 @@ package com.example.feature.main.chat.component
 import com.arkivanov.decompose.ComponentContext
 import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.example.data.chat.api.ChatRepository
+import com.example.data.user.api.UserDataStoreRepository
 import com.example.feature.main.chat.component.ChatComponent
 import com.example.feature.main.chat.store.ChatStore
 import com.example.feature.main.chat.store.ChatStoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 class DefaultChatComponent(
     componentContext: ComponentContext,
-    private val storeFactory: StoreFactory
+    private val storeFactory: StoreFactory,
+    private val chatRepository: ChatRepository,
+    private val userDataStoreRepository: UserDataStoreRepository,
+    private val chatId: String,
+    private val navigateBack: () -> Unit
 ) : ChatComponent, ComponentContext by componentContext {
 
     private val store = instanceKeeper.getStore {
         ChatStoreFactory(
-            factory = storeFactory
+            factory = storeFactory,
+            chatRepository = chatRepository,
+            userDataStoreRepository = userDataStoreRepository,
+            chatId = chatId
         ).create()
     }
 
@@ -29,5 +40,15 @@ class DefaultChatComponent(
 
     override fun onIntent(intent: ChatStore.Intent) {
         store.accept(intent)
+    }
+
+    init {
+        scope.launch {
+            store.labels.collect { label ->
+                when (label) {
+                    is ChatStore.Label.NavigateBack -> navigateBack()
+                }
+            }
+        }
     }
 }

@@ -1,35 +1,36 @@
 package com.example.feature.main.chat
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowLeft
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.feature.main.chat.component.ChatComponent
+import com.example.core.design.theme.DanTalkTheme
 import com.example.data.chat.api.model.Message
-import com.example.feature.R
+import com.example.feature.main.chat.component.ChatComponent
+import com.example.feature.main.chat.model.MessageListItem
+import com.example.feature.main.chat.store.ChatStore
+import com.example.feature.main.chat.ui.components.BottomChatBar
+import com.example.feature.main.chat.ui.components.ChatTopBar
+import com.example.feature.main.chat.ui.components.Message
+import com.example.feature.main.chat.ui.components.MessagesDate
+import kotlinx.coroutines.launch
 
 @Composable
 fun ChatContent(
@@ -38,146 +39,145 @@ fun ChatContent(
     val state by component.state.collectAsState()
 
     Content(
+        state = state,
+        onIntent = component::onIntent
     )
 }
 
 @Composable
 private fun Content(
+    state: ChatStore.State,
+    onIntent: (ChatStore.Intent) -> Unit,
 ) {
-    val testMessages = listOf(
-        Message(
-            id = "1",
-            sender = "1",
-            message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam aliquam neque sed dui hendrerit, quis euismod urna suscipit. Praesent ut lectus ut dolor iaculis blandit. Morbi nec purus at enim blandit blandit."
-        ),
-        Message(
-            id = "2",
-            sender = "2",
-            message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam aliquam neque sed dui hendrerit, quis euismod urna suscipit. Praesent ut lectus ut dolor iaculis blandit. Morbi nec purus at enim blandit blandit."
-        ),
-        Message(
-            id = "3",
-            sender = "1",
-            message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam aliquam neque sed dui hendrerit, quis euismod urna suscipit. Praesent ut lectus ut dolor iaculis blandit. Morbi nec purus at enim blandit blandit."
-        )
-    )
+    val lazyListState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    val firstVisibleDate by remember(state.messages) {
+        derivedStateOf {
+            when (val firstItem = state.messages.getOrNull(lazyListState.firstVisibleItemIndex)) {
+                is MessageListItem.DateItem -> firstItem.date
+                is MessageListItem.MessageItem -> firstItem.message.date
+                else -> ""
+            }
+        }
+    }
+
+    val isDateVisible by remember(state.messages) {
+        derivedStateOf {
+            val visibleItems = lazyListState.layoutInfo.visibleItemsInfo
+            if (visibleItems.isEmpty()) return@derivedStateOf false
+            val alreadyVisible = visibleItems.any {
+                val item = state.messages.getOrNull(it.index)
+                item is MessageListItem.DateItem && item.date == firstVisibleDate
+            }
+            !alreadyVisible
+        }
+    }
+
+    val unreadMessageIds by remember(state.messages) {
+        derivedStateOf {
+            val visibleItemIndexes = lazyListState.layoutInfo.visibleItemsInfo.map { it.index }
+            if (visibleItemIndexes.isEmpty()) return@derivedStateOf emptyList()
+
+            val visibleUnreadMessages = visibleItemIndexes.mapNotNull { index ->
+                val item = state.messages[index]
+                if (item is MessageListItem.MessageItem && !item.message.isCurrentUserMessage && !item.message.read) item else null
+            }
+
+            if (visibleUnreadMessages.isEmpty()) return@derivedStateOf emptyList()
+
+            val lastVisibleUnread = visibleUnreadMessages.first()
+            val lastIndex = state.messages.indexOf(lastVisibleUnread)
+
+            val messagesToMarkAsRead = state.messages
+                .drop(lastIndex)
+                .filterIsInstance<Message>()
+                .filter { it.sender != state.currentUser.id && !it.read }
+                .map { it.id }
+
+            messagesToMarkAsRead + lastVisibleUnread.message.id
+        }
+    }
+
+    LaunchedEffect(unreadMessageIds) {
+        if (unreadMessageIds.isEmpty()) return@LaunchedEffect
+        onIntent(ChatStore.Intent.ReadMessage(unreadMessageIds))
+    }
 
     Scaffold(
         topBar = {
             ChatTopBar(
-                title = "Никнейм",
-                navigateBack = { }
+                title = state.chat?.user?.username,
+                navigateBack = { onIntent(ChatStore.Intent.NavigateBack) }
             )
         },
         bottomBar = {
-            BottomChatBar()
-        }
+            BottomChatBar(
+                message = state.currentMessage,
+                onMessageChange = { onIntent(ChatStore.Intent.OnMessageChange(it)) },
+                sendMessage = {
+                    onIntent(ChatStore.Intent.SendMessage)
+                    scope.launch {
+                        lazyListState.scrollToItem(0)
+                    }
+                }
+            )
+        },
+        containerColor = DanTalkTheme.colors.singleTheme
     ) { contentPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = contentPadding
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
+            contentAlignment = Alignment.TopCenter
         ) {
-            items(testMessages) { message ->
-                Message(
-                    message = message,
-                    currentUserId = "2"
-                )
-            }
+            if (state.messages.isNotEmpty()) {
+                LazyColumn(
+                    state = lazyListState,
+                    reverseLayout = true,
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(state.messages) { item ->
+                        when (item) {
+                            is MessageListItem.DateItem -> MessagesDate(date = item.date)
+                            is MessageListItem.MessageItem -> Message(
+                                message = item.message,
+                                currentUserId = state.currentUser.id
+                            )
+                        }
+                    }
+                }
+                if (isDateVisible && firstVisibleDate.isNotEmpty())
+                    MessagesDate(
+                        date = firstVisibleDate,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+            } else ChatShimmerContent()
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ChatTopBar(
-    title: String,
-    navigateBack: () -> Unit,
-) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                fontSize = 20.sp
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = navigateBack,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = Color.Black
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowLeft,
-                    contentDescription = null
-                )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = navigateBack,
-                colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = Color.Black
-                )
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.ic_launcher_background),
-                    contentDescription = null
-                )
-            }
-        }
-    )
-}
-
-@Composable
-private fun Message(
-    message: Message,
-    currentUserId: String,
-) {
-    val isCurrentUsersMessage = currentUserId == message.sender
-    val modifier = if (isCurrentUsersMessage)
-        Modifier
-            .padding(end = 20.dp)
-            .background(
-                Color.Gray,
-                RoundedCornerShape(
-                    topStart = 0.dp,
-                    topEnd = 20.dp,
-                    bottomStart = 20.dp,
-                    bottomEnd = 20.dp
-                )
-            )
-    else
-        Modifier
-            .padding(start = 20.dp)
-            .background(
-                Color.LightGray,
-                RoundedCornerShape(
-                    topStart = 20.dp,
-                    topEnd = 20.dp,
-                    bottomStart = 20.dp,
-                    bottomEnd = 0.dp
-                )
-            )
-    Box(
-        modifier = modifier
+private fun ChatShimmerContent() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = message.message,
-            modifier = Modifier.padding(8.dp)
+        CircularProgressIndicator(
+            color = DanTalkTheme.colors.main
         )
     }
 }
 
-@Composable
-private fun BottomChatBar() {
-
-}
-
-@Composable
 @Preview
+@Composable
 private fun Preview() {
-    Content(
-    )
+    DanTalkTheme {
+        Content(
+            state = ChatStore.State(),
+            onIntent = {}
+        )
+    }
 }

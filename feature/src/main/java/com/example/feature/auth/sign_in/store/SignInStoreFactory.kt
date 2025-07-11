@@ -45,7 +45,7 @@ class SignInStoreFactory(
                             .let { dispatch(Msg.UpdateValidation(it)) }
                         if (state().validation !is SignInValidation.Valid) return@onIntent
                         dispatch(Msg.UpdateLoading(true))
-                        launch { signIn() }
+                        signIn()
                     }
                     onIntent<Intent.NavigateToSignUp> { publish(Label.NavigateToSignUp) }
                     onIntent<Intent.DismissDialog> {
@@ -74,25 +74,28 @@ class SignInStoreFactory(
             else -> SignInValidation.Valid
         }
 
-    private suspend fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signIn() {
-        withContext(Dispatchers.IO) {
-            authRepository.login(state().email, state().password)
-        }.onSuccess { uid ->
-            saveUserData(uid)
-            dispatch(Msg.UpdateLoading(isSuccessful = true))
-        }.onFailure {
-            val validation = when (it) {
-                is SignInException.NetworkError -> SignInValidation.NetworkError
-                is SignInException.InvalidEmailFormat -> SignInValidation.InvalidEmailFormat
-                is SignInException.InvalidCredentials -> SignInValidation.InvalidCredentials
-                else -> SignInValidation.NetworkError
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signIn() {
+        launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val userId = authRepository.login(state().email, state().password)
+                    saveUserData(userId)
+                }
+                dispatch(Msg.UpdateLoading(isSuccessful = true))
+            } catch (e: SignInException) {
+                val validation = when (e) {
+                    is SignInException.NetworkError -> SignInValidation.NetworkError
+                    is SignInException.InvalidEmailFormat -> SignInValidation.InvalidEmailFormat
+                    is SignInException.InvalidCredentials -> SignInValidation.InvalidCredentials
+                    else -> SignInValidation.NetworkError
+                }
+                dispatch(Msg.UpdateLoading(isLoading = false))
+                dispatch(Msg.UpdateValidation(validation))
             }
-            dispatch(Msg.UpdateLoading(isLoading = false))
-            dispatch(Msg.UpdateValidation(validation))
         }
     }
 
-    private suspend fun saveUserData(userId: String) = withContext(Dispatchers.IO) {
+    private suspend fun saveUserData(userId: String) {
         val userData = userRepository.getUser(userId)
         userDataStoreRepository.saveUserData(userData)
     }

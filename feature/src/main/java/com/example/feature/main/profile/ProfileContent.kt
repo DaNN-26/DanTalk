@@ -53,10 +53,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.design.components.snackbar.CustomSnackbarHost
-import com.example.core.design.components.topbar.ExtraTopBar
+import com.example.core.ui.components.snackbar.CustomSnackbarHost
+import com.example.core.ui.components.topbar.ExtraTopBar
 import com.example.core.design.theme.DanTalkTheme
-import com.example.core.design.util.InputFormField
+import com.example.core.ui.util.InputFormField
 import com.example.dantalk.features.main.profile.component.ProfileComponent
 import com.example.feature.main.profile.store.ProfileStore
 import com.example.feature.main.profile.ui.components.ProfileBottomSheet
@@ -71,7 +71,7 @@ fun ProfileContent(
 
     Content(
         state = state,
-        onIntent = { component.onIntent(it) },
+        onIntent = component::onIntent,
     )
 }
 

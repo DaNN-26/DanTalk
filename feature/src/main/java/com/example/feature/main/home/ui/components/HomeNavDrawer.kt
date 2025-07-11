@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiUserData
 import com.example.data.user.api.model.UserData
 
 @Composable
@@ -50,7 +51,7 @@ fun HomeNavDrawer(
     onInfoClick: () -> Unit,
     onSignOutClick: () -> Unit,
     @DrawableRes avatar: Int,
-    user: UserData,
+    user: UiUserData,
     content: @Composable () -> Unit,
 ) {
     ModalNavigationDrawer(

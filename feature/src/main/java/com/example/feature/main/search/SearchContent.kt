@@ -26,14 +26,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.design.components.chat.ChatItem
-import com.example.core.design.components.topbar.SearchTopBar
+import com.example.core.ui.components.chat.ChatItem
+import com.example.core.ui.components.topbar.SearchTopBar
 import com.example.core.design.theme.DanTalkTheme
 import com.example.feature.main.search.component.SearchComponent
 import com.example.feature.main.search.store.SearchStore
 import com.example.feature.R
 
-val testChats = listOf("1", "2", "3", "3", "3", "3", "3", "3", "3", "3", "3")
 val testContacts = listOf(1, 2, 3)
 
 @Composable
@@ -44,7 +43,7 @@ fun SearchContent(
 
     Content(
         state = state,
-        onIntent = { component.onIntent(it) }
+        onIntent = component::onIntent
     )
 }
 
@@ -87,16 +86,13 @@ private fun Content(
                 )
                 Spacer(Modifier.height(6.dp))
             }
-            items(state.usersByQuery) {
-                ChatItem(
-                    onChatClick = { /*TODO*/ },
-                    avatar = R.drawable.ic_launcher_background,
-                    name = it.username,
-                    lastMessage = "Привет, как дела",
-                    lastMessageTime = "12:13",
-                    lastMessagesAmount = "1"
-                )
-            }
+//            items(state.usersByQuery) {
+//                ChatItem(
+//                    onChatClick = { /*TODO*/ },
+//                    avatar = R.drawable.ic_launcher_background,
+//                    chat =
+//                )
+//            }
         }
     }
 }

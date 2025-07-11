@@ -18,10 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.design.components.MainButton
-import com.example.core.design.components.MainTextField
+import com.example.core.ui.components.MainButton
+import com.example.core.ui.components.MainTextField
 import com.example.core.design.theme.DanTalkTheme
-import com.example.core.design.util.InputFormField
+import com.example.core.ui.util.InputFormField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

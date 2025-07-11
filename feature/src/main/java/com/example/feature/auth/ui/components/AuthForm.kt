@@ -25,9 +25,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.design.components.MainButton
+import com.example.core.ui.components.MainButton
 import com.example.core.design.theme.DanTalkTheme
-import com.example.core.design.util.InputFormField
+import com.example.core.ui.util.InputFormField
 
 @Composable
 fun AuthForm(

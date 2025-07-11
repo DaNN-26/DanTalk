@@ -37,8 +37,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.design.components.ItemShimmer
-import com.example.core.design.components.topbar.SearchTopBar
+import com.example.core.ui.components.ItemShimmer
+import com.example.core.ui.components.topbar.SearchTopBar
 import com.example.core.design.theme.DanTalkTheme
 import com.example.feature.main.people.component.PeopleComponent
 import com.example.feature.main.people.store.PeopleStore
@@ -53,7 +53,7 @@ fun PeopleContent(
 
     Content(
         state = state,
-        onIntent = { component.onIntent(it) }
+        onIntent = component::onIntent
     )
 }
 

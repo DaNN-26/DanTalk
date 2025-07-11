@@ -29,7 +29,7 @@ class DefaultRootComponent(
 
     private suspend fun getInitialConfiguration(): Config {
         val user = userDataStoreRepository.getUserData.first()
-        return if (user.userId.isNotEmpty()) Config.Main else Config.Auth
+        return if (user.id.isNotEmpty()) Config.Main else Config.Auth
     }
 
     override val stack = childStack(

@@ -1,13 +1,11 @@
-package com.example.core.design.components.chat
+package com.example.core.ui.components.chat
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,17 +29,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.core.ui.model.UiChat
 import com.example.core.design.theme.DanTalkTheme
 
 @Composable
 fun ChatItem(
     modifier: Modifier = Modifier,
+    avatar: Int,
+    chat: UiChat,
     onChatClick: () -> Unit,
-    @DrawableRes avatar: Int,
-    name: String,
-    lastMessage: String,
-    lastMessageTime: String,
-    lastMessagesAmount: String
 ) {
     Column(
         modifier = modifier
@@ -61,15 +59,18 @@ fun ChatItem(
                     .size(65.dp)
                     .clip(CircleShape)
             )
-            Row(
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                val lastMessage = chat.messages.firstOrNull()
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = name,
+                        text = chat.user.username,
                         fontSize = 18.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -77,26 +78,31 @@ fun ChatItem(
                         color = DanTalkTheme.colors.oppositeTheme
                     )
                     Text(
-                        text = lastMessage,
-                        fontSize = 16.sp,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = DanTalkTheme.colors.hint
-                    )
-                }
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    Text(
-                        text = lastMessageTime,
+                        text = lastMessage?.time ?: "",
                         fontSize = 14.sp,
                         color = DanTalkTheme.colors.hint
                     )
-                    NewMessagesIndicator(
-                        amount = lastMessagesAmount.toInt()
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = lastMessage?.message ?: "Нет сообщений",
+                        modifier = Modifier.weight(1f),
+                        fontSize = 16.sp,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        color = DanTalkTheme.colors.hint
                     )
+                    chat.unreadMessagesCount.let {
+                        if (it > 0) NewMessagesIndicator(it)
+                    }
+
+                    lastMessage.let {
+                        if (it != null && it.isCurrentUserMessage)
+                            CheckMark(it.read)
+                    }
                 }
             }
         }
@@ -109,22 +115,34 @@ fun ChatItem(
 
 @Composable
 private fun NewMessagesIndicator(
-    amount: Int
+    amount: Int,
 ) {
-    val modifier = if(amount <= 9) Modifier.size(28.dp) else Modifier.width(IntrinsicSize.Max)
+    val horizontalPadding = if (amount <= 9) 10.dp else 6.dp
 
     Box(
-        modifier = modifier
+        modifier = Modifier
             .clip(CircleShape)
             .background(DanTalkTheme.colors.main),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = amount.toString(),
-            modifier = Modifier.padding(6.dp),
+            modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 6.dp),
             fontSize = 15.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.White
         )
     }
+}
+
+@Composable
+private fun CheckMark(
+    isRead: Boolean,
+) {
+    Icon(
+        imageVector = Icons.Default.Check,
+        contentDescription = null,
+        modifier = Modifier.size(18.dp),
+        tint = if (isRead) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
+    )
 }

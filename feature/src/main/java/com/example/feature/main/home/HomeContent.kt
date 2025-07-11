@@ -14,9 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.example.core.design.components.ItemShimmer
-import com.example.core.design.components.chat.AnimatedChatItem
+import com.example.core.ui.components.ItemShimmer
+import com.example.core.ui.components.chat.AnimatedChatItem
+import com.example.core.ui.model.UiChat
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.util.toTimeString
 import com.example.feature.main.home.component.HomeComponent
 import com.example.feature.main.home.store.HomeStore
 import com.example.feature.main.home.ui.components.HomeNavDrawer
@@ -46,7 +48,7 @@ fun HomeContent(
     ) {
         Content(
             state = state,
-            onIntent = { component.onIntent(it) },
+            onIntent = component::onIntent,
             onMenuClick = {
                 scope.launch {
                     drawerState.apply { if (isClosed) open() else close() }
@@ -85,10 +87,9 @@ private fun Content(
             HomeLazyColumn(
                 lazyListState = lazyListState,
                 modifier = Modifier.padding(contentPadding),
-                onChatClick = { /*TODO*/ },
+                onChatClick = { onIntent(HomeStore.Intent.OpenChat(it)) },
                 onDeleteChatClick = { /*TODO*/ },
                 chats = state.chats,
-                currentUserData = state.user
             )
     }
 }
@@ -97,27 +98,20 @@ private fun Content(
 private fun HomeLazyColumn(
     lazyListState: LazyListState,
     modifier: Modifier = Modifier,
-    onChatClick: () -> Unit,
+    onChatClick: (id: String) -> Unit,
     onDeleteChatClick: () -> Unit,
-    chats: List<Chat>,
-    currentUserData: UserData,
+    chats: List<UiChat>,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = lazyListState
     ) {
         items(chats) { chat ->
-            val name = chat.users.find { it.userId != currentUserData.userId }?.username ?: ""
-            val lastMessage = chat.messages.lastOrNull()?.message ?: "Нет сообщений"
-
             AnimatedChatItem(
-                onChatClick = onChatClick,
+                onChatClick = { onChatClick(chat.id) },
                 onDeleteIconClick = onDeleteChatClick,
                 avatar = R.drawable.ic_launcher_background,
-                name = name,
-                lastMessage = lastMessage,
-                lastMessageTime = "12:13",
-                lastMessagesAmount = "1"
+                chat = chat
             )
         }
     }

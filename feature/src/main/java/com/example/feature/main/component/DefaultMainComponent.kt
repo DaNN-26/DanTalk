@@ -7,15 +7,15 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.mvikotlin.core.store.StoreFactory
-import com.example.feature.main.home.component.DefaultHomeComponent
-import com.example.feature.main.people.component.DefaultPeopleComponent
-import com.example.feature.main.profile.component.DefaultProfileComponent
-import com.example.feature.main.search.component.DefaultSearchComponent
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.feature.main.chat.component.DefaultChatComponent
+import com.example.feature.main.home.component.DefaultHomeComponent
+import com.example.feature.main.people.component.DefaultPeopleComponent
+import com.example.feature.main.profile.component.DefaultProfileComponent
+import com.example.feature.main.search.component.DefaultSearchComponent
 import kotlinx.serialization.Serializable
 
 class DefaultMainComponent(
@@ -47,7 +47,12 @@ class DefaultMainComponent(
             is Config.Search -> MainComponent.Child.Search(searchComponent(componentContext))
             is Config.Profile -> MainComponent.Child.Profile(profileComponent(componentContext))
             is Config.People -> MainComponent.Child.People(peopleComponent(componentContext))
-            is Config.Chat -> MainComponent.Child.Chat(chatComponent(componentContext))
+            is Config.Chat -> MainComponent.Child.Chat(
+                chatComponent(
+                    componentContext = componentContext,
+                    config = config
+                )
+            )
         }
 
     @OptIn(DelicateDecomposeApi::class)
@@ -61,7 +66,8 @@ class DefaultMainComponent(
             navigateToSearch = { navigation.push(Config.Search) },
             navigateToProfile = { navigation.push(Config.Profile) },
             navigateToPeople = { navigation.push(Config.People) },
-            navigateToAuth = navigateToAuth
+            navigateToAuth = navigateToAuth,
+            navigateToChat = { navigation.push(Config.Chat(it)) }
         )
 
     private fun searchComponent(componentContext: ComponentContext) =
@@ -91,10 +97,17 @@ class DefaultMainComponent(
             navigateBack = { navigation.pop() }
         )
 
-    private fun chatComponent(componentContext: ComponentContext) =
+    private fun chatComponent(
+        componentContext: ComponentContext,
+        config: Config.Chat,
+    ) =
         DefaultChatComponent(
             componentContext = componentContext,
-            storeFactory = storeFactory
+            storeFactory = storeFactory,
+            chatRepository = chatRepository,
+            userDataStoreRepository = userDataStoreRepository,
+            chatId = config.id,
+            navigateBack = { navigation.pop() }
         )
 
     @Serializable
@@ -112,6 +125,6 @@ class DefaultMainComponent(
         data object People : Config
 
         @Serializable
-        data object Chat : Config
+        class Chat(val id: String) : Config
     }
 }

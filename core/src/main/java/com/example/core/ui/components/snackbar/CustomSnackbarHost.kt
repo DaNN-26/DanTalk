@@ -1,4 +1,4 @@
-package com.example.core.design.components.snackbar
+package com.example.core.ui.components.snackbar
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape

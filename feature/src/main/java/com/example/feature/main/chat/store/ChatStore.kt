@@ -1,16 +1,29 @@
 package com.example.feature.main.chat.store
 
 import com.arkivanov.mvikotlin.core.store.Store
+import com.example.core.ui.model.UiChat
 import com.example.feature.main.chat.store.ChatStore.*
 import com.example.data.chat.api.model.Chat
+import com.example.data.user.api.model.UserData
+import com.example.feature.main.chat.model.MessageListItem
 
-interface ChatStore : Store<Intent, State, Nothing> {
+interface ChatStore : Store<Intent, State, Label> {
 
     sealed interface Intent {
-        /* TODO */
+        class OnMessageChange(val message: String) : Intent
+        data object SendMessage : Intent
+        class ReadMessage(val ids: List<String>) : Intent
+        data object NavigateBack : Intent
     }
 
     data class State(
-        val chats: List<Chat> = emptyList()
+        val chat: UiChat? = null,
+        val messages: List<MessageListItem> = emptyList(),
+        val currentMessage: String = "",
+        val currentUser: UserData = UserData()
     )
+
+    sealed interface Label {
+        data object NavigateBack : Label
+    }
 }

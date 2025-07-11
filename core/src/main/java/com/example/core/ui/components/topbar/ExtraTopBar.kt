@@ -1,4 +1,4 @@
-package com.example.core.design.components.topbar
+package com.example.core.ui.components.topbar
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size

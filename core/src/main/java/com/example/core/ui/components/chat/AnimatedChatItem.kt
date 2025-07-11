@@ -1,6 +1,5 @@
-package com.example.core.design.components.chat
+package com.example.core.ui.components.chat
 
-import androidx.annotation.DrawableRes
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.exponentialDecay
@@ -29,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.example.core.ui.model.UiChat
 import com.example.core.design.theme.DanTalkTheme
 import kotlin.math.roundToInt
 
@@ -39,13 +39,10 @@ private enum class SwipeAnchors {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AnimatedChatItem(
+    avatar: Int,
+    chat: UiChat,
     onChatClick: () -> Unit,
-    onDeleteIconClick: () -> Unit,
-    @DrawableRes avatar: Int,
-    name: String,
-    lastMessage: String,
-    lastMessageTime: String,
-    lastMessagesAmount: String
+    onDeleteIconClick: () -> Unit
 ) {
     val swipeState = remember {
         AnchoredDraggableState(
@@ -94,12 +91,9 @@ fun AnimatedChatItem(
                     state = swipeState,
                     orientation = Orientation.Horizontal
                 ),
-            onChatClick = onChatClick,
             avatar = avatar,
-            name = name,
-            lastMessage = lastMessage,
-            lastMessageTime = lastMessageTime,
-            lastMessagesAmount = lastMessagesAmount
+            chat = chat,
+            onChatClick = onChatClick
         )
     }
 }

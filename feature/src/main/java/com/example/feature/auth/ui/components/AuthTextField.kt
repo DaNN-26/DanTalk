@@ -18,7 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.core.design.components.MainTextField
+import com.example.core.ui.components.MainTextField
 import com.example.core.design.theme.DanTalkTheme
 
 @Composable

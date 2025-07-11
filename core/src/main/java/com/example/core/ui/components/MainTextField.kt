@@ -1,4 +1,4 @@
-package com.example.core.design.components
+package com.example.core.ui.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.size
