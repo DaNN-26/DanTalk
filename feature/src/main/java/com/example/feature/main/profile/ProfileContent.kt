@@ -1,5 +1,7 @@
 package com.example.feature.main.profile
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -53,15 +57,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.snackbar.CustomSnackbarHost
 import com.example.core.ui.components.topbar.ExtraTopBar
-import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiUserData
 import com.example.core.ui.util.InputFormField
 import com.example.dantalk.features.main.profile.component.ProfileComponent
+import com.example.feature.R
 import com.example.feature.main.profile.store.ProfileStore
 import com.example.feature.main.profile.ui.components.ProfileBottomSheet
 import com.example.feature.main.profile.util.ProfileValidation
-import com.example.feature.R
 
 @Composable
 fun ProfileContent(
@@ -162,9 +168,15 @@ private fun Content(
         }
     }
 
+    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) onIntent(ProfileStore.Intent.LoadImageIntoStorage(uri))
+    }
+
     Scaffold(
         topBar = {
             ExtraTopBar(
+                actionsIcon = Icons.Default.Image,
+                actions = { photoLauncher.launch("image/*") },
                 navigateBack = { onIntent(ProfileStore.Intent.NavigateBack) },
                 color = Color.White
             )
@@ -182,12 +194,7 @@ private fun Content(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
-            ProfileAvatar(
-                avatar = R.drawable.ic_launcher_background,
-                firstname = state.currentUser?.firstname ?: "",
-                lastname = state.currentUser?.lastname ?: "",
-                patronymic = state.currentUser?.patronymic ?: ""
-            )
+            ProfileAvatar(state.currentUser ?: UiUserData())
             ProfileInformation(
                 email = state.currentUser?.email ?: "",
                 username = state.currentUser?.username ?: "",
@@ -208,28 +215,27 @@ private fun Content(
 
 @Composable
 private fun ProfileAvatar(
-    @DrawableRes avatar: Int,
-    firstname: String,
-    lastname: String,
-    patronymic: String,
+    user: UiUserData
 ) {
-    val name = if ((lastname.isBlank() && patronymic.isBlank()))
-        firstname
-    else if (patronymic.isBlank())
-        firstname + "\n" + lastname
-    else if (lastname.isBlank())
-        firstname + "\n" + patronymic
+    val name = if ((user.lastname.isBlank() && user.patronymic.isBlank()))
+        user.firstname
+    else if (user.patronymic.isBlank())
+        user.firstname + "\n" + user.lastname
+    else if (user.lastname.isBlank())
+        user.firstname + "\n" + user.patronymic
     else
-        firstname + "\n" + lastname + "\n" + patronymic
+        user.firstname + "\n" + user.lastname + "\n" + user.patronymic
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .shadow(6.dp)
     ) {
-        Image(
-            painter = painterResource(avatar),
+        AsyncImage(
+            model = user.avatar,
             contentDescription = null,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f),
             contentScale = ContentScale.Crop,
             colorFilter = ColorFilter.tint(
                 color = if (isSystemInDarkTheme())

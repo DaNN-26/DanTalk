@@ -36,10 +36,8 @@ private enum class SwipeAnchors {
     Center, Right
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AnimatedChatItem(
-    avatar: Int,
     chat: UiChat,
     onChatClick: () -> Unit,
     onDeleteIconClick: () -> Unit
@@ -91,7 +89,6 @@ fun AnimatedChatItem(
                     state = swipeState,
                     orientation = Orientation.Horizontal
                 ),
-            avatar = avatar,
             chat = chat,
             onChatClick = onChatClick
         )

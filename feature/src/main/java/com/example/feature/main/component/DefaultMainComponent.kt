@@ -9,6 +9,7 @@ import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.feature.main.chat.component.DefaultChatComponent
@@ -25,6 +26,7 @@ class DefaultMainComponent(
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val storageRepository: StorageRepository,
     private val navigateToAuth: () -> Unit,
 ) : ComponentContext by componentContext, MainComponent {
 
@@ -85,6 +87,7 @@ class DefaultMainComponent(
             storeFactory = storeFactory,
             userRepository = userRepository,
             userDataStoreRepository = userDataStoreRepository,
+            storageRepository = storageRepository,
             navigateBack = { navigation.pop() }
         )
 

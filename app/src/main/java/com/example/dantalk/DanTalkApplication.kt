@@ -11,7 +11,7 @@ class DanTalkApplication : Application() {
         super.onCreate()
 
         startKoin {
-            modules(listOf(AuthModule, FirestoreModule, DatastoreModule))
+            modules(listOf(AuthModule, FirestoreModule, DatastoreModule, KtorModule))
             androidLogger()
             androidContext(this@DanTalkApplication)
         }

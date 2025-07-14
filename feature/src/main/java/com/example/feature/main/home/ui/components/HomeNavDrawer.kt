@@ -34,10 +34,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.model.UiUserData
 import com.example.data.user.api.model.UserData
@@ -50,7 +52,6 @@ fun HomeNavDrawer(
     onSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
     onSignOutClick: () -> Unit,
-    @DrawableRes avatar: Int,
     user: UiUserData,
     content: @Composable () -> Unit,
 ) {
@@ -62,11 +63,7 @@ fun HomeNavDrawer(
                 drawerShape = RoundedCornerShape(topEnd = 24.dp),
                 drawerContainerColor = DanTalkTheme.colors.singleTheme
             ) {
-                NavDrawerHeader(
-                    avatar = avatar,
-                    name = user.firstname,
-                    email = user.email
-                )
+                NavDrawerHeader(user)
                 Column(
                     modifier = Modifier.fillMaxHeight(),
                     verticalArrangement = Arrangement.SpaceBetween
@@ -109,9 +106,7 @@ fun HomeNavDrawer(
 
 @Composable
 private fun NavDrawerHeader(
-    @DrawableRes avatar: Int,
-    name: String,
-    email: String
+    user: UiUserData
 ) {
     val gradient = if(!isSystemInDarkTheme())
         Brush.linearGradient(
@@ -135,22 +130,23 @@ private fun NavDrawerHeader(
             .padding(horizontal = 16.dp)
             .padding(top = 12.dp)
     ) {
-        Image(
-            painter = painterResource(avatar),
+        AsyncImage(
+            model = user.avatar,
             contentDescription = null,
             modifier = Modifier
                 .size(70.dp)
-                .clip(CircleShape)
+                .clip(CircleShape),
+            contentScale = ContentScale.Crop
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = name,
+            text = user.firstname,
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.White
         )
         Text(
-            text = email,
+            text = user.email,
             color = Color.White
         )
         Spacer(Modifier.height(12.dp))

@@ -1,10 +1,14 @@
 package com.example.feature.main.profile.store
 
+import android.net.Uri
 import android.util.Patterns
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.core.ui.model.UiUserData
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.data.user.api.model.UserData
@@ -12,6 +16,7 @@ import com.example.feature.main.profile.store.ProfileStore.Intent
 import com.example.feature.main.profile.store.ProfileStore.Label
 import com.example.feature.main.profile.store.ProfileStore.State
 import com.example.feature.main.profile.util.ProfileValidation
+import com.example.feature.mapper.toUi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -20,14 +25,15 @@ class ProfileStoreFactory(
     private val factory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val storageRepository: StorageRepository,
 ) {
     sealed interface Action {
-        class SetUser(val user: UserData) : Action
+        class SetUser(val user: UiUserData) : Action
     }
 
     sealed interface Msg {
-        class SetUser(val userData: UserData) : Msg
-        class UpdateNewUserData(val newUserData: UserData) : Msg
+        class SetUser(val userData: UiUserData) : Msg
+        class UpdateNewUserData(val newUserData: UiUserData) : Msg
         class UpdateValidation(val validation: ProfileValidation) : Msg
     }
 
@@ -40,28 +46,16 @@ class ProfileStoreFactory(
                     launch(Dispatchers.IO) {
                         userDataStoreRepository.getUserData.collect { user ->
                             withContext(Dispatchers.Main) {
-                                dispatch(Action.SetUser(user))
+                                dispatch(Action.SetUser(user.toUi()))
                             }
                         }
                     }
                 },
                 executorFactory = coroutineExecutorFactory {
-                    onAction<Action.SetUser> {
-                        dispatch(Msg.SetUser(it.user))
-                    }
+                    onAction<Action.SetUser> { dispatch(Msg.SetUser(it.user)) }
                     onIntent<Intent.UpdateNewUserData> { dispatch(Msg.UpdateNewUserData(it.newUserData)) }
-                    onIntent<Intent.SaveNewUserData> {
-                        if (state().currentUser != null)
-                            launch {
-                                validateInput(state().newUserData, state().currentUser!!)
-                                    .let { dispatch(Msg.UpdateValidation(it)) }
-                                if (state().validation !is ProfileValidation.Valid) return@launch
-                                val newUserData = state().newUserData.copy(
-                                    id = state().currentUser!!.id
-                                )
-                                saveNewUserData(newUserData)
-                            }
-                    }
+                    onIntent<Intent.SaveNewUserData> { saveNewUserData() }
+                    onIntent<Intent.LoadImageIntoStorage> { loadImageIntoStorage(it.uri)}
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->
@@ -70,15 +64,34 @@ class ProfileStoreFactory(
                             currentUser = msg.userData,
                             newUserData = msg.userData
                         )
+
                         is Msg.UpdateNewUserData -> copy(newUserData = msg.newUserData)
                         is Msg.UpdateValidation -> copy(validation = msg.validation)
                     }
                 }
             ) {}
 
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.saveNewUserData() {
+        if (state().currentUser != null)
+            launch {
+                dispatch(
+                    Msg.UpdateValidation(
+                        validateInput(
+                            state().newUserData,
+                            state().currentUser!!
+                        )
+                    )
+                )
+                if (state().validation !is ProfileValidation.Valid) return@launch
+                val updatedUserData =
+                    state().newUserData.toUserData().copy(id = state().currentUser!!.id)
+                saveNewUserData(updatedUserData)
+            }
+    }
+
     private suspend fun validateInput(
-        newUserData: UserData,
-        currentUser: UserData,
+        newUserData: UiUserData,
+        currentUser: UiUserData,
     ): ProfileValidation = withContext(Dispatchers.IO) {
         when {
             newUserData.email.isEmpty() -> ProfileValidation.EmptyEmail
@@ -109,4 +122,19 @@ class ProfileStoreFactory(
         userRepository.updateUser(newUserData)
         userDataStoreRepository.saveUserData(newUserData)
     }
+
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.loadImageIntoStorage(uri: Uri) {
+        launch(Dispatchers.IO) {
+            val image = storageRepository.postImage(uri)
+            withContext(Dispatchers.Main) {
+                state().newUserData.copy(avatar = image.url).let {
+                    saveNewUserData(it.toUserData())
+                    dispatch(Msg.UpdateNewUserData(it))
+                }
+            }
+        }
+    }
+
+    private fun UiUserData.toUserData(): UserData =
+        UserData(id, avatar, email, username, firstname, lastname, patronymic)
 }

@@ -12,7 +12,6 @@ import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Chat
 import com.example.data.user.api.UserDataStoreRepository
-import com.example.data.user.api.model.UserData
 import com.example.feature.main.home.store.HomeStore.Intent
 import com.example.feature.main.home.store.HomeStore.Label
 import com.example.feature.main.home.store.HomeStore.State
@@ -49,15 +48,7 @@ class HomeStoreFactory(
             Store<Intent, State, Label> by factory.create<Intent, Action, Msg, State, Label>(
                 name = "HomeStore",
                 initialState = State(),
-                bootstrapper = coroutineBootstrapper {
-                    dispatch(Action.UpdateLoading(true))
-                    launch {
-                        userDataStoreRepository.getUserData.collect { user ->
-                            dispatch(Action.SetUser(user.toUi()))
-                            getChats(user.id)
-                        }
-                    }
-                },
+                bootstrapper = coroutineBootstrapper { getData() },
                 executorFactory = coroutineExecutorFactory {
                     onAction<Action.GetChats> { dispatch(Msg.GetChats(it.chats)) }
                     onAction<Action.SetUser> { dispatch(Msg.SetUser(it.user)) }
@@ -77,30 +68,39 @@ class HomeStoreFactory(
                 }
             ) {}
 
-    private suspend fun CoroutineBootstrapperScope<Action>.getChats(userId: String) =
-        withContext(Dispatchers.IO) {
-            getChatsFlow(userId).collect { chats ->
-                withContext(Dispatchers.Main) {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun CoroutineBootstrapperScope<Action>.getData() {
+        dispatch(Action.UpdateLoading(true))
+        launch {
+            userDataStoreRepository.getUserData
+                .map { it.toUi() }
+                .flatMapLatest { user ->
+                    dispatch(Action.SetUser(user))
+                    getChatsFlow(user.id)
+                }
+                .collect { chats ->
                     dispatch(Action.GetChats(chats))
                     dispatch(Action.UpdateLoading(false))
                 }
-            }
         }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private fun getChatsFlow(userId: String): Flow<List<UiChat>> =
-        chatRepository.getChats(userId).flatMapLatest { chats ->
-            combine(
-                chats.map { chat ->
-                    chatRepository.getChatMessages(chat.id)
-                        .map { messages ->
-                            Chat(
-                                id = chat.id,
-                                users = chat.users
-                            ).toUi(userId, messages.toUi(userId))
-                        }
-                }
-            ) { it.toList() }
+    private suspend fun getChatsFlow(userId: String): Flow<List<UiChat>> =
+        withContext(Dispatchers.IO) {
+            chatRepository.getChats(userId).flatMapLatest { chats ->
+                combine(
+                    chats.map { chat ->
+                        chatRepository.getChatMessages(chat.id)
+                            .map { messages ->
+                                Chat(
+                                    id = chat.id,
+                                    users = chat.users
+                                ).toUi(userId, messages.toUi(userId))
+                            }
+                    }
+                ) { it.toList() }
+            }
         }
 
 

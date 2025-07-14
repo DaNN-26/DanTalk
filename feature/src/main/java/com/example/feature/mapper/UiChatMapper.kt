@@ -8,6 +8,6 @@ internal fun Chat.toUi(currentUserId: String, messages: List<UiMessage> = emptyL
     UiChat(
         id = id,
         user = users.first { it.id != currentUserId }.toUi(),
-        messages = messages,
+        lastMessage = messages.firstOrNull(),
         unreadMessagesCount = messages.filter { !it.read && !it.isCurrentUserMessage }.size
     )

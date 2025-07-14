@@ -14,18 +14,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.ItemShimmer
 import com.example.core.ui.components.chat.AnimatedChatItem
 import com.example.core.ui.model.UiChat
-import com.example.core.design.theme.DanTalkTheme
-import com.example.core.util.toTimeString
+import com.example.feature.R
 import com.example.feature.main.home.component.HomeComponent
 import com.example.feature.main.home.store.HomeStore
 import com.example.feature.main.home.ui.components.HomeNavDrawer
 import com.example.feature.main.home.ui.components.HomeTopBar
-import com.example.data.chat.api.model.Chat
-import com.example.data.user.api.model.UserData
-import com.example.feature.R
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,7 +40,6 @@ fun HomeContent(
         onSettingsClick = { /*TODO*/ },
         onInfoClick = { /*TODO*/ },
         onSignOutClick = { component.onIntent(HomeStore.Intent.SignOut) },
-        avatar = R.drawable.ic_launcher_background,
         user = state.user
     ) {
         Content(
@@ -98,7 +94,7 @@ private fun Content(
 private fun HomeLazyColumn(
     lazyListState: LazyListState,
     modifier: Modifier = Modifier,
-    onChatClick: (id: String) -> Unit,
+    onChatClick: (String) -> Unit,
     onDeleteChatClick: () -> Unit,
     chats: List<UiChat>,
 ) {
@@ -108,10 +104,9 @@ private fun HomeLazyColumn(
     ) {
         items(chats) { chat ->
             AnimatedChatItem(
+                chat = chat,
                 onChatClick = { onChatClick(chat.id) },
-                onDeleteIconClick = onDeleteChatClick,
-                avatar = R.drawable.ic_launcher_background,
-                chat = chat
+                onDeleteIconClick = onDeleteChatClick
             )
         }
     }

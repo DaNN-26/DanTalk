@@ -1,6 +1,5 @@
 package com.example.core.ui.components.chat
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,18 +22,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.ui.model.UiChat
+import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiChat
 
 @Composable
 fun ChatItem(
     modifier: Modifier = Modifier,
-    avatar: Int,
     chat: UiChat,
     onChatClick: () -> Unit,
 ) {
@@ -52,19 +50,18 @@ fun ChatItem(
                 .padding(horizontal = 10.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Image(
-                painter = painterResource(avatar),
+            AsyncImage(
+                model = chat.user.avatar,
                 contentDescription = null,
                 modifier = Modifier
                     .size(65.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                val lastMessage = chat.messages.firstOrNull()
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -78,7 +75,7 @@ fun ChatItem(
                         color = DanTalkTheme.colors.oppositeTheme
                     )
                     Text(
-                        text = lastMessage?.time ?: "",
+                        text = chat.lastMessage?.time ?: "",
                         fontSize = 14.sp,
                         color = DanTalkTheme.colors.hint
                     )
@@ -88,7 +85,7 @@ fun ChatItem(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = lastMessage?.message ?: "Нет сообщений",
+                        text = chat.lastMessage?.message ?: "Нет сообщений",
                         modifier = Modifier.weight(1f),
                         fontSize = 16.sp,
                         maxLines = 2,
@@ -99,7 +96,7 @@ fun ChatItem(
                         if (it > 0) NewMessagesIndicator(it)
                     }
 
-                    lastMessage.let {
+                    chat.lastMessage.let {
                         if (it != null && it.isCurrentUserMessage)
                             CheckMark(it.read)
                     }

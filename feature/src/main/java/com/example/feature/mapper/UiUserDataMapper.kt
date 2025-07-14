@@ -6,6 +6,7 @@ import com.example.data.user.api.model.UserData
 internal fun UserData.toUi() =
     UiUserData(
         id = id,
+        avatar = avatar,
         email = email,
         username = username,
         firstname = firstname,

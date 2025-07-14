@@ -7,12 +7,15 @@ import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.feature.auth.component.DefaultAuthComponent
 import com.example.feature.main.component.DefaultMainComponent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
@@ -23,6 +26,7 @@ class DefaultRootComponent(
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val storageRepository: StorageRepository,
 ) : ComponentContext by componentContext, RootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -67,6 +71,7 @@ class DefaultRootComponent(
             userRepository = userRepository,
             chatRepository = chatRepository,
             userDataStoreRepository = userDataStoreRepository,
+            storageRepository = storageRepository,
             navigateToAuth = { navigation.replaceAll(Config.Auth) }
         )
 

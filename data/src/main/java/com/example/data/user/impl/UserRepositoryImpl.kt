@@ -12,6 +12,7 @@ internal class UserRepositoryImpl(
 ) : UserRepository {
     override suspend fun createUser(userData: UserData) {
         val data = hashMapOf(
+            "avatar" to userData.avatar,
             "email" to userData.email,
             "username" to userData.username,
             "firstname" to userData.firstname,
@@ -82,6 +83,7 @@ internal class UserRepositoryImpl(
 
     override suspend fun updateUser(userData: UserData) {
         val data = mapOf(
+            "avatar" to userData.avatar,
             "email" to userData.email,
             "username" to userData.username,
             "firstname" to userData.firstname,

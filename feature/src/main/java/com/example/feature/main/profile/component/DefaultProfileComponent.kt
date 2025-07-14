@@ -6,6 +6,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.example.dantalk.features.main.profile.component.ProfileComponent
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.feature.main.profile.store.ProfileStore
@@ -20,6 +21,7 @@ class DefaultProfileComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val storageRepository: StorageRepository,
     private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, ProfileComponent {
 
@@ -27,7 +29,8 @@ class DefaultProfileComponent(
         ProfileStoreFactory(
             factory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository
+            userDataStoreRepository = userDataStoreRepository,
+            storageRepository = storageRepository
         ).create()
     }
 
