@@ -3,7 +3,11 @@ package com.example.data.user.impl
 import android.util.Log
 import com.example.data.user.api.UserRepository
 import com.example.data.user.api.model.UserData
+import com.example.data.user.impl.entity.UserDataEntity
+import com.example.data.user.impl.mapper.toDomain
+import com.example.data.user.impl.mapper.toEntity
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -11,35 +15,28 @@ internal class UserRepositoryImpl(
     private val firestore: FirebaseFirestore,
 ) : UserRepository {
     override suspend fun createUser(userData: UserData) {
-        val data = hashMapOf(
-            "avatar" to userData.avatar,
-            "email" to userData.email,
-            "username" to userData.username,
-            "firstname" to userData.firstname,
-            "lastname" to userData.lastname,
-            "patronymic" to userData.patronymic
-        )
+        val entity = userData.toEntity()
         firestore.collection("users").document(userData.id)
-            .set(data)
-            .addOnSuccessListener { Log.d("UserRepository", "createUser: $data") }
+            .set(entity)
+            .addOnSuccessListener { Log.d("UserRepository", "createUser: $entity") }
             .addOnFailureListener { Log.d("UserRepository", "exception: ${it.message}") }
     }
 
-    override suspend fun getUser(userId: String): UserData {
-        return suspendCoroutine { continuation ->
-            firestore.collection("users")
+    override suspend fun getUser(userId: String): UserData =
+        try {
+            val snapshot = firestore.collection("users")
                 .document(userId)
                 .get()
-                .addOnSuccessListener {
-                    if (it != null) {
-                        val response = it.toObject(UserData::class.java)!!
-                        val userData = response.copy(id = userId)
-                        continuation.resume(userData)
-                    }
-                }
-                .addOnFailureListener { Log.d("UserRepository", "exception: ${it.message}") }
+                .await()
+
+            val entity = snapshot.toObject(UserDataEntity::class.java)
+                ?: throw Exception("User not found")
+
+            entity.toDomain(snapshot.id)
+        } catch (e: Exception) {
+            Log.d("UserRepository", "exception: ${e.message}")
+            throw e
         }
-    }
 
     override suspend fun isValueExists(field: String, value: String): Boolean =
         suspendCoroutine { continuation ->
@@ -55,31 +52,27 @@ internal class UserRepositoryImpl(
                 .addOnFailureListener { Log.d("UserRepository", "exception: ${it.message}") }
         }
 
-    override suspend fun getUsersByQuery(query: String): List<UserData> =
-        suspendCoroutine { continuation ->
-            if (query.isBlank()) {
-                continuation.resume(emptyList())
-                return@suspendCoroutine
-            }
-            firestore.collection("users")
+    override suspend fun getUsersByQuery(query: String): List<UserData> {
+        try {
+            if (query.isBlank()) return emptyList()
+            val snapshot = firestore.collection("users")
                 .orderBy("username")
                 .startAt(query)
                 .endAt("$query\uf8ff")
                 .get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.documents.isNotEmpty()) {
-                        val users = document.documents.map {
-                            it.toObject(UserData::class.java)!!.copy(id = it.id)
-                        }
-                        continuation.resume(users)
-                    } else
-                        continuation.resume(emptyList())
-                }
-                .addOnFailureListener {
-                    continuation.resume(emptyList())
-                    Log.d("UserRepository", "exception: ${it.message}")
-                }
+                .await()
+
+            if (snapshot != null && snapshot.documents.isEmpty()) return emptyList()
+            val entities = snapshot.documents.mapNotNull {
+                it.id to it.toObject(UserDataEntity::class.java)
+            }.toMap()
+
+            return entities.map { it.value?.toDomain(it.key) ?: throw Exception("User not found") }
+        } catch (e: Exception) {
+            Log.d("UserRepository", "exception: ${e.message}")
+            throw e
         }
+    }
 
     override suspend fun updateUser(userData: UserData) {
         val data = mapOf(
