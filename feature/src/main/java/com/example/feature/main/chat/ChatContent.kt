@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiUserData
 import com.example.data.chat.api.model.Message
 import com.example.feature.main.chat.component.ChatComponent
 import com.example.feature.main.chat.model.MessageListItem
@@ -107,7 +108,7 @@ private fun Content(
     Scaffold(
         topBar = {
             ChatTopBar(
-                title = state.chat?.user?.username,
+                user = state.chat?.user,
                 navigateBack = { onIntent(ChatStore.Intent.NavigateBack) }
             )
         },

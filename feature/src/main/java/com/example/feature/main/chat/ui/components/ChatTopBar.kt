@@ -1,6 +1,5 @@
 package com.example.feature.main.chat.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -15,24 +14,25 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
-import com.example.feature.R
+import com.example.core.ui.model.UiUserData
 import com.valentinilk.shimmer.shimmer
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatTopBar(
-    title: String?,
+    user: UiUserData?,
     navigateBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
         title = {
-            if (title != null)
+            if (user != null)
                 Text(
-                    text = title,
+                    text = user.username,
                     fontSize = 20.sp
                 )
             else
@@ -58,10 +58,11 @@ fun ChatTopBar(
             IconButton(
                 onClick = { /*TODO*/ }
             ) {
-                if (title != null)
-                    Image(
-                        painter = painterResource(R.drawable.ic_launcher_background),
-                        contentDescription = null
+                if (user != null)
+                    AsyncImage(
+                        model = user.avatar,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
                     )
             }
         },
