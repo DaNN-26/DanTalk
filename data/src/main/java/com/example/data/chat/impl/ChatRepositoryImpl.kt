@@ -9,6 +9,7 @@ import com.example.data.chat.impl.entity.MessageEntity
 import com.example.data.chat.impl.mapper.toDomain
 import com.example.data.chat.impl.mapper.toEntity
 import com.example.data.user.api.model.UserData
+import com.example.data.user.impl.entity.UserDataEntity
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -31,13 +32,17 @@ internal class ChatRepositoryImpl(
                     Log.d("Firestore", "Failed to get chats $e")
                     return@addSnapshotListener
                 }
-                val chatEntities = snapshot?.documents?.mapNotNull {
-                    it.toObject(ChatEntity::class.java)?.copy(id = it.id)
-                }
+                if (snapshot == null) return@addSnapshotListener
+                val chatEntities = snapshot.documents.mapNotNull {
+                    it.id to it.toObject(ChatEntity::class.java)
+                }.toMap()
                 CoroutineScope(Dispatchers.IO).launch {
-                    val chats = chatEntities?.map { entity ->
-                        entity.toDomain(getChatUsers(entity.users))
-                    } ?: emptyList()
+                    val chats = chatEntities.map { entity ->
+                        entity.value?.toDomain(
+                            entity.key,
+                            getChatUsers(entity.value?.users ?: emptyList())
+                        ) ?: throw Exception("Failed to get chat")
+                    }
                     trySend(chats)
                 }
             }
@@ -51,11 +56,10 @@ internal class ChatRepositoryImpl(
             firestore.collection("users").document(userIds[1])
         )
 
-        val data = mapOf(
-            "users" to users,
-        )
-        firestore.collection("chats").document(chatId)
-            .set(data)
+        val entity = ChatEntity(users)
+        firestore.collection("chats")
+            .document(chatId)
+            .set(entity)
             .addOnSuccessListener { Log.d("Firestore", "Chat successfully created") }
             .addOnFailureListener { Log.d("Firestore", "Chat failed to create $it") }
     }
@@ -75,10 +79,9 @@ internal class ChatRepositoryImpl(
                 .await()
 
             val chatEntity = snapshot.toObject(ChatEntity::class.java)
-                ?.copy(id = snapshot.id)
                 ?: throw Exception("Failed to get chat")
 
-            chatEntity.toDomain(getChatUsers(chatEntity.users))
+            chatEntity.toDomain(snapshot.id, getChatUsers(chatEntity.users))
         } catch (e: Exception) {
             Log.d("Firestore", "Failed to get chat $e")
             throw e
