@@ -3,6 +3,7 @@ package com.example.core.ui.components.topbar
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -17,10 +18,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.components.IconButtonWithElevation
 
 @Composable
 fun ExtraTopBar(
@@ -60,33 +63,25 @@ fun ExtraTopBar(
             .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(
+        IconButtonWithElevation(
             onClick = navigateBack,
             modifier = Modifier.size(50.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.Transparent,
                 contentColor = color
-            )
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.ArrowBackIosNew,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-        }
-        IconButton(
+            ),
+            icon = Icons.Outlined.ArrowBackIosNew,
+            contentModifier = Modifier.size(24.dp)
+        )
+        IconButtonWithElevation(
             onClick = actions,
             modifier = Modifier.size(50.dp),
             colors = IconButtonDefaults.iconButtonColors(
                 containerColor = Color.Transparent,
                 contentColor = color
-            )
-        ) {
-            Icon(
-                imageVector = actionsIcon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
-        }
+            ),
+            icon = actionsIcon,
+            contentModifier = Modifier.size(24.dp)
+        )
     }
 }
