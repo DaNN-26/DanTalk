@@ -5,6 +5,7 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.example.data.chat.api.ChatRepository
 import com.example.feature.main.people.store.PeopleStore
 import com.example.feature.main.people.store.PeopleStoreFactory
 import com.example.data.user.api.UserDataStoreRepository
@@ -19,6 +20,8 @@ class DefaultPeopleComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val chatRepository: ChatRepository,
+    private val navigateToChat: (String) -> Unit,
     private val navigateBack: () -> Unit,
 ) : PeopleComponent, ComponentContext by componentContext {
 
@@ -26,7 +29,8 @@ class DefaultPeopleComponent(
         PeopleStoreFactory(
             factory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository
+            userDataStoreRepository = userDataStoreRepository,
+            chatRepository = chatRepository
         ).create()
     }
 
@@ -44,6 +48,7 @@ class DefaultPeopleComponent(
             store.labels.collect { label ->
                 when (label) {
                     is PeopleStore.Label.NavigateBack -> navigateBack()
+                    is PeopleStore.Label.OpenChat -> { navigateToChat(label.chatId) }
                 }
             }
         }

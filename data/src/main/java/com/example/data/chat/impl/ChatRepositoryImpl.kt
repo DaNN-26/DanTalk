@@ -9,7 +9,6 @@ import com.example.data.chat.impl.entity.MessageEntity
 import com.example.data.chat.impl.mapper.toDomain
 import com.example.data.chat.impl.mapper.toEntity
 import com.example.data.user.api.model.UserData
-import com.example.data.user.impl.entity.UserDataEntity
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
@@ -49,8 +48,8 @@ internal class ChatRepositoryImpl(
         awaitClose { listener.remove() }
     }
 
-    override suspend fun createChat(userIds: List<String>) {
-        val chatId = userIds.joinToString("")
+    override suspend fun createChat(userIds: List<String>) : String {
+        val chatId = userIds.sorted().joinToString("")
         val users = listOf(
             firestore.collection("users").document(userIds[0]),
             firestore.collection("users").document(userIds[1])
@@ -60,15 +59,15 @@ internal class ChatRepositoryImpl(
         firestore.collection("chats")
             .document(chatId)
             .set(entity)
-            .addOnSuccessListener { Log.d("Firestore", "Chat successfully created") }
-            .addOnFailureListener { Log.d("Firestore", "Chat failed to create $it") }
+            .await()
+
+        return chatId
     }
 
     override suspend fun deleteChat(id: String) {
         firestore.collection("chats").document(id)
             .delete()
-            .addOnSuccessListener { Log.d("Firestore", "Chat successfully deleted") }
-            .addOnFailureListener { Log.d("Firestore", "Chat failed to delete $it") }
+            .await()
     }
 
     override suspend fun getChat(id: String): Chat =
@@ -93,6 +92,7 @@ internal class ChatRepositoryImpl(
             .collection("messages")
             .document()
             .set(message.toEntity())
+            .await()
     }
 
     override fun getChatMessages(chatId: String): Flow<List<Message>> = callbackFlow {
@@ -119,8 +119,24 @@ internal class ChatRepositoryImpl(
                 .collection("messages")
                 .document(messageId)
                 .update("read", true)
+                .await()
         }
     }
+
+    override suspend fun getChatIdByUserId(userIds: List<String>): String =
+        try {
+            val documentId = userIds.sorted().joinToString("")
+            val snapshot = firestore.collection("chats")
+                .document(documentId)
+                .get()
+                .await()
+
+            if (!snapshot.exists()) throw Exception("Chat not found")
+            snapshot.id
+        } catch (e: Exception) {
+            Log.d("Firestore", "Failed to get chat $e")
+            throw e
+        }
 
     private suspend fun getChatUsers(refs: List<DocumentReference>): List<UserData> =
         refs.map { ref ->

@@ -1,45 +1,51 @@
 package com.example.feature.main.people.store
 
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
+import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
+import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.core.ui.model.UiUserData
+import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
-import com.example.data.user.api.model.UserData
-import com.example.feature.main.people.store.PeopleStore.*
+import com.example.feature.main.people.store.PeopleStore.Intent
+import com.example.feature.main.people.store.PeopleStore.Label
+import com.example.feature.main.people.store.PeopleStore.State
+import com.example.feature.mapper.toUi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PeopleStoreFactory(
     private val factory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val chatRepository: ChatRepository,
 ) {
+    sealed interface Action {
+        class SetUserId(val userId: String) : Action
+    }
+
     sealed interface Msg {
         class OnQueryChange(val query: String) : Msg
-        class UpdateUsers(val usersByQuery: List<UserData>) : Msg
+        class UpdateUsers(val usersByQuery: List<UiUserData>) : Msg
         class UpdateLoading(val isLoading: Boolean) : Msg
+        class SetUserId(val userId: String) : Msg
     }
 
     fun create(): PeopleStore =
         object : PeopleStore,
-            Store<Intent, State, Label> by factory.create<Intent, Nothing, Msg, State, Label>(
+            Store<Intent, State, Label> by factory.create<Intent, Action, Msg, State, Label>(
                 name = "PeopleStore",
                 initialState = State(),
+                bootstrapper = coroutineBootstrapper { getCurrentUserId() },
                 executorFactory = coroutineExecutorFactory {
-                    onIntent<Intent.OnQueryChange> {
-                        dispatch(Msg.OnQueryChange(it.query))
-                        dispatch(Msg.UpdateLoading(true))
-                        launch {
-                            val query = it.query.trim()
-                            val users = getUsersByQuery(query)
-                            dispatch(Msg.UpdateUsers(users.await()))
-                            dispatch(Msg.UpdateLoading(false))
-                        }
-                    }
+                    onAction<Action.SetUserId> { dispatch(Msg.SetUserId(it.userId)) }
+                    onIntent<Intent.OnQueryChange> { getUsersByQuery(it.query) }
+                    onIntent<Intent.OpenChat> { getChatIdByUserId(it.userId) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->
@@ -47,17 +53,45 @@ class PeopleStoreFactory(
                         is Msg.OnQueryChange -> copy(query = msg.query)
                         is Msg.UpdateUsers -> copy(usersByQuery = msg.usersByQuery)
                         is Msg.UpdateLoading -> copy(isLoading = msg.isLoading)
+                        is Msg.SetUserId -> copy(currentUserId = msg.userId)
                     }
                 }
             ) {}
 
-    private suspend fun getUsersByQuery(query: String) =
-        coroutineScope {
-            async(Dispatchers.IO) {
-                val currentUser = userDataStoreRepository.getUserData.first()
-                val users = userRepository.getUsersByQuery(query).toMutableList()
-                users.remove(currentUser)
-                return@async users
+    private fun CoroutineBootstrapperScope<Action>.getCurrentUserId() {
+        launch {
+            userDataStoreRepository.getUserData.collect { user ->
+                dispatch(Action.SetUserId(user.id))
             }
         }
+    }
+
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.getUsersByQuery(query: String) {
+        dispatch(Msg.OnQueryChange(query))
+        dispatch(Msg.UpdateLoading(true))
+        val updQuery = query.trim()
+        val currentUserId = state().currentUserId
+        launch(Dispatchers.IO) {
+            val users = userRepository.getUsersByQuery(updQuery).filter { it.id != currentUserId }
+            withContext(Dispatchers.Main) {
+                dispatch(Msg.UpdateUsers(users.toUi()))
+                dispatch(Msg.UpdateLoading(false))
+            }
+        }
+    }
+
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Label>.getChatIdByUserId(userId: String) {
+        launch {
+            val userIds = listOf(state().currentUserId, userId)
+            try {
+                withContext(Dispatchers.IO) {
+                    chatRepository.getChatIdByUserId(userIds)
+                }.let { publish(Label.OpenChat(it)) }
+            } catch (e: Exception) {
+                withContext(Dispatchers.IO) {
+                    chatRepository.createChat(userIds)
+                }.let { publish(Label.OpenChat(it)) }
+            }
+        }
+    }
 }

@@ -1,7 +1,5 @@
 package com.example.feature.main.people
 
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,19 +29,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.ItemShimmer
 import com.example.core.ui.components.topbar.SearchTopBar
-import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiUserData
 import com.example.feature.main.people.component.PeopleComponent
 import com.example.feature.main.people.store.PeopleStore
-import com.example.data.user.api.model.UserData
-import com.example.feature.R
 
 @Composable
 fun PeopleContent(
@@ -86,7 +84,7 @@ private fun Content(
                 PeopleLazyColumn(
                     users = state.usersByQuery,
                     onUserClick = { /*TODO*/ },
-                    onMessageSendClick = { /*TODO*/ },
+                    onMessageSendClick = { onIntent(PeopleStore.Intent.OpenChat(it)) },
                     modifier = Modifier.padding(contentPadding)
                 )
         }
@@ -95,9 +93,9 @@ private fun Content(
 
 @Composable
 private fun PeopleLazyColumn(
-    users: List<UserData>,
+    users: List<UiUserData>,
     onUserClick: () -> Unit,
-    onMessageSendClick: () -> Unit,
+    onMessageSendClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -109,8 +107,7 @@ private fun PeopleLazyColumn(
         items(users) { user ->
             UserItem(
                 onUserClick = onUserClick,
-                onMessageSendClick = onMessageSendClick,
-                avatar = R.drawable.ic_launcher_background,
+                onMessageSendClick = { onMessageSendClick(user.id) },
                 userData = user
             )
         }
@@ -122,8 +119,7 @@ private fun UserItem(
     modifier: Modifier = Modifier,
     onUserClick: () -> Unit,
     onMessageSendClick: () -> Unit,
-    @DrawableRes avatar: Int,
-    userData: UserData,
+    userData: UiUserData,
 ) {
     Column(
         modifier = modifier
@@ -142,12 +138,13 @@ private fun UserItem(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Image(
-                    painter = painterResource(avatar),
+                AsyncImage(
+                    model = userData.avatar,
                     contentDescription = null,
                     modifier = Modifier
                         .size(65.dp)
-                        .clip(CircleShape)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
                 )
                 Column(
                     verticalArrangement = Arrangement.spacedBy(4.dp)

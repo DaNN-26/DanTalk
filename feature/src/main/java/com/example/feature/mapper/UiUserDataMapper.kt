@@ -13,3 +13,6 @@ internal fun UserData.toUi() =
         lastname = lastname,
         patronymic = patronymic
     )
+
+internal fun List<UserData>.toUi() =
+    map { it.toUi() }

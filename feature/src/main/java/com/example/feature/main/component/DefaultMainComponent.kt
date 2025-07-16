@@ -91,12 +91,15 @@ class DefaultMainComponent(
             navigateBack = { navigation.pop() }
         )
 
+    @OptIn(DelicateDecomposeApi::class)
     private fun peopleComponent(componentContext: ComponentContext) =
         DefaultPeopleComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             userRepository = userRepository,
             userDataStoreRepository = userDataStoreRepository,
+            chatRepository = chatRepository,
+            navigateToChat = { navigation.push(Config.Chat(it)) },
             navigateBack = { navigation.pop() }
         )
 
