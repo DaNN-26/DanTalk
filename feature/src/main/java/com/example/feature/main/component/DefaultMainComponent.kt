@@ -12,25 +12,32 @@ import com.example.data.chat.api.ChatRepository
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.chat.component.DefaultChatComponent
 import com.example.feature.main.home.component.DefaultHomeComponent
 import com.example.feature.main.people.component.DefaultPeopleComponent
 import com.example.feature.main.profile.component.DefaultProfileComponent
 import com.example.feature.main.search.component.DefaultSearchComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
 class DefaultMainComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
-    private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
     private val storageRepository: StorageRepository,
+    private val clearUserData: () -> Unit,
     private val navigateToAuth: () -> Unit,
 ) : ComponentContext by componentContext, MainComponent {
 
     private val navigation = StackNavigation<Config>()
+
+    private val userDataFlow = userDataStoreRepository.getUserData
 
     override val stack = childStack(
         source = navigation,
@@ -62,9 +69,9 @@ class DefaultMainComponent(
         DefaultHomeComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
-            authRepository = authRepository,
             chatRepository = chatRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
+            clearUserData = clearUserData,
             navigateToSearch = { navigation.push(Config.Search) },
             navigateToProfile = { navigation.push(Config.Profile) },
             navigateToPeople = { navigation.push(Config.People) },
@@ -77,7 +84,7 @@ class DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
             navigateBack = { navigation.pop() }
         )
 
@@ -97,7 +104,7 @@ class DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
             chatRepository = chatRepository,
             navigateToChat = { navigation.push(Config.Chat(it)) },
             navigateBack = { navigation.pop() }
@@ -111,7 +118,7 @@ class DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             chatRepository = chatRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
             chatId = config.id,
             navigateBack = { navigation.pop() }
         )

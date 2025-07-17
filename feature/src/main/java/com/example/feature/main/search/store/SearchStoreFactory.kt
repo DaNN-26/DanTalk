@@ -12,13 +12,14 @@ import com.example.feature.main.search.store.SearchStore.State
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SearchStoreFactory(
     private val factory: StoreFactory,
     private val userRepository: UserRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>
 ) {
     sealed interface Msg {
         class OnQueryChange(val query: String) : Msg
@@ -62,7 +63,7 @@ class SearchStoreFactory(
     private suspend fun getUsersByQuery(query: String) =
         coroutineScope {
             async(Dispatchers.IO) {
-                val currentUser = userDataStoreRepository.getUserData.first()
+                val currentUser = userDataFlow.first()
                 val users = userRepository.getUsersByQuery(query).toMutableList()
                 users.remove(currentUser)
                 return@async users

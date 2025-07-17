@@ -18,13 +18,14 @@ import com.example.feature.main.chat.store.ChatStore.Intent
 import com.example.feature.main.chat.store.ChatStore.Label
 import com.example.feature.main.chat.store.ChatStore.State
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ChatStoreFactory(
     private val factory: StoreFactory,
     private val chatRepository: ChatRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
     private val chatId: String,
 ) {
     private sealed interface Action {
@@ -48,7 +49,7 @@ class ChatStoreFactory(
                 initialState = State(),
                 bootstrapper = coroutineBootstrapper {
                     launch {
-                        userDataStoreRepository.getUserData.collect { user ->
+                        userDataFlow.collect { user ->
                             dispatch(Action.SetUser(user))
                             getChat(chatId, user.id)
                         }

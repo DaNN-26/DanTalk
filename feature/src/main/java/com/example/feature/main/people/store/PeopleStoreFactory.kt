@@ -1,6 +1,5 @@
 package com.example.feature.main.people.store
 
-import android.util.Log
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
@@ -9,20 +8,21 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import com.example.core.ui.model.UiUserData
 import com.example.data.chat.api.ChatRepository
-import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.people.store.PeopleStore.Intent
 import com.example.feature.main.people.store.PeopleStore.Label
 import com.example.feature.main.people.store.PeopleStore.State
 import com.example.feature.mapper.toUi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class PeopleStoreFactory(
     private val factory: StoreFactory,
     private val userRepository: UserRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
     private val chatRepository: ChatRepository,
 ) {
     sealed interface Action {
@@ -60,7 +60,7 @@ class PeopleStoreFactory(
 
     private fun CoroutineBootstrapperScope<Action>.getCurrentUserId() {
         launch {
-            userDataStoreRepository.getUserData.collect { user ->
+            userDataFlow.collect { user ->
                 dispatch(Action.SetUserId(user.id))
             }
         }

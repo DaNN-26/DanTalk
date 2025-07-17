@@ -7,18 +7,20 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.search.store.SearchStore
 import com.example.feature.main.search.store.SearchStoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class DefaultSearchComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
     private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, SearchComponent {
 
@@ -26,7 +28,7 @@ class DefaultSearchComponent(
         SearchStoreFactory(
             factory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository
+            userDataFlow = userDataFlow
         ).create()
     }
 

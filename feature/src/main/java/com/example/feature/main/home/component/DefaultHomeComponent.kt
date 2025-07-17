@@ -9,19 +9,21 @@ import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.home.store.HomeStore
 import com.example.feature.main.home.store.HomeStoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
-    private val authRepository: AuthRepository,
     private val chatRepository: ChatRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
+    private val clearUserData: () -> Unit,
     private val navigateToSearch: () -> Unit,
     private val navigateToProfile: () -> Unit,
     private val navigateToPeople: () -> Unit,
@@ -32,9 +34,9 @@ class DefaultHomeComponent(
     private val store = instanceKeeper.getStore {
         HomeStoreFactory(
             factory = storeFactory,
-            authRepository = authRepository,
             chatRepository = chatRepository,
-            userDataStoreRepository = userDataStoreRepository
+            userDataFlow = userDataFlow,
+            clearUserData = clearUserData
         ).create()
     }
 

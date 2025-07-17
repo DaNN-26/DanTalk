@@ -11,7 +11,7 @@ import com.example.core.ui.model.UiUserData
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Chat
-import com.example.data.user.api.UserDataStoreRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.home.store.HomeStore.Intent
 import com.example.feature.main.home.store.HomeStore.Label
 import com.example.feature.main.home.store.HomeStore.State
@@ -27,9 +27,9 @@ import kotlinx.coroutines.withContext
 
 class HomeStoreFactory(
     private val factory: StoreFactory,
-    private val authRepository: AuthRepository,
     private val chatRepository: ChatRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
+    private val clearUserData: () -> Unit
 ) {
     private sealed interface Action {
         class GetChats(val chats: List<UiChat>) : Action
@@ -72,7 +72,7 @@ class HomeStoreFactory(
     private fun CoroutineBootstrapperScope<Action>.getData() {
         dispatch(Action.UpdateLoading(true))
         launch {
-            userDataStoreRepository.getUserData
+            userDataFlow
                 .map { it.toUi() }
                 .flatMapLatest { user ->
                     dispatch(Action.SetUser(user))
@@ -105,10 +105,7 @@ class HomeStoreFactory(
 
 
     private fun CoroutineExecutorScope<State, Nothing, Nothing, Label>.signOut() {
-        launch {
-            authRepository.signOut()
-            userDataStoreRepository.clearUserData()
-            publish(Label.NavigateToAuth)
-        }
+        clearUserData()
+        publish(Label.NavigateToAuth)
     }
 }

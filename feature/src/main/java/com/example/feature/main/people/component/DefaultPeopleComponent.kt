@@ -10,16 +10,18 @@ import com.example.feature.main.people.store.PeopleStore
 import com.example.feature.main.people.store.PeopleStoreFactory
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
+import com.example.data.user.api.model.UserData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class DefaultPeopleComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
     private val chatRepository: ChatRepository,
     private val navigateToChat: (String) -> Unit,
     private val navigateBack: () -> Unit,
@@ -29,7 +31,7 @@ class DefaultPeopleComponent(
         PeopleStoreFactory(
             factory = storeFactory,
             userRepository = userRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
             chatRepository = chatRepository
         ).create()
     }

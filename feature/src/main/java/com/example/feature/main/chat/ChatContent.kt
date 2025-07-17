@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,8 +22,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.core.design.theme.DanTalkTheme
-import com.example.core.ui.model.UiUserData
 import com.example.data.chat.api.model.Message
 import com.example.feature.main.chat.component.ChatComponent
 import com.example.feature.main.chat.model.MessageListItem
@@ -132,23 +133,25 @@ private fun Content(
                 .padding(contentPadding),
             contentAlignment = Alignment.TopCenter
         ) {
-            if (state.messages.isNotEmpty()) {
-                LazyColumn(
-                    state = lazyListState,
-                    reverseLayout = true,
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(state.messages) { item ->
-                        when (item) {
-                            is MessageListItem.DateItem -> MessagesDate(date = item.date)
-                            is MessageListItem.MessageItem -> Message(
-                                message = item.message,
-                                currentUserId = state.currentUser.id
-                            )
+            if (state.chat != null) {
+                if (state.messages.isEmpty()) EmptyChatContent()
+                else
+                    LazyColumn(
+                        state = lazyListState,
+                        reverseLayout = true,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        items(state.messages) { item ->
+                            when (item) {
+                                is MessageListItem.DateItem -> MessagesDate(date = item.date)
+                                is MessageListItem.MessageItem -> Message(
+                                    message = item.message,
+                                    currentUserId = state.currentUser.id
+                                )
+                            }
                         }
                     }
-                }
                 if (isDateVisible && firstVisibleDate.isNotEmpty())
                     MessagesDate(
                         date = firstVisibleDate,
@@ -168,6 +171,21 @@ private fun ChatShimmerContent() {
     ) {
         CircularProgressIndicator(
             color = DanTalkTheme.colors.main
+        )
+    }
+}
+
+@Composable
+private fun EmptyChatContent() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Еще нет сообщений",
+            fontSize = 16.sp,
+            color = DanTalkTheme.colors.oppositeTheme
         )
     }
 }

@@ -7,19 +7,21 @@ import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
+import com.example.data.user.api.model.UserData
 import com.example.feature.main.chat.component.ChatComponent
 import com.example.feature.main.chat.store.ChatStore
 import com.example.feature.main.chat.store.ChatStoreFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class DefaultChatComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
     private val chatRepository: ChatRepository,
-    private val userDataStoreRepository: UserDataStoreRepository,
+    private val userDataFlow: Flow<UserData>,
     private val chatId: String,
     private val navigateBack: () -> Unit
 ) : ChatComponent, ComponentContext by componentContext {
@@ -28,7 +30,7 @@ class DefaultChatComponent(
         ChatStoreFactory(
             factory = storeFactory,
             chatRepository = chatRepository,
-            userDataStoreRepository = userDataStoreRepository,
+            userDataFlow = userDataFlow,
             chatId = chatId
         ).create()
     }

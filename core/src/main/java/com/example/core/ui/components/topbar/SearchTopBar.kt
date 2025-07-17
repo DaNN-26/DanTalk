@@ -67,7 +67,7 @@ fun SearchTopBar(
             }
         },
      colors = TopAppBarDefaults.topAppBarColors(
-         containerColor = DanTalkTheme.colors.topBar,
+         containerColor = DanTalkTheme.colors.singleTheme,
          navigationIconContentColor = DanTalkTheme.colors.hint
      )
     )

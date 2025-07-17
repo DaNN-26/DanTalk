@@ -30,10 +30,18 @@ class DefaultRootComponent(
 ) : ComponentContext by componentContext, RootComponent {
 
     private val navigation = StackNavigation<Config>()
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     private suspend fun getInitialConfiguration(): Config {
         val user = userDataStoreRepository.getUserData.first()
         return if (user.id.isNotEmpty()) Config.Main else Config.Auth
+    }
+
+    private fun clearUserData() {
+        scope.launch {
+            authRepository.signOut()
+            userDataStoreRepository.clearUserData()
+        }
     }
 
     override val stack = childStack(
@@ -67,11 +75,11 @@ class DefaultRootComponent(
         DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
-            authRepository = authRepository,
             userRepository = userRepository,
             chatRepository = chatRepository,
             userDataStoreRepository = userDataStoreRepository,
             storageRepository = storageRepository,
+            clearUserData = ::clearUserData,
             navigateToAuth = { navigation.replaceAll(Config.Auth) }
         )
 
