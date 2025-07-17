@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowBackIosNew
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,7 +43,7 @@ fun ExtraTopBar(
         )
     ) {
         Icon(
-            imageVector = Icons.Outlined.ArrowBackIosNew,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
             contentDescription = null,
             modifier = Modifier.size(24.dp)
         )
@@ -70,7 +71,7 @@ fun ExtraTopBar(
                 containerColor = Color.Transparent,
                 contentColor = color
             ),
-            icon = Icons.Outlined.ArrowBackIosNew,
+            icon = Icons.AutoMirrored.Outlined.ArrowBack,
             contentModifier = Modifier.size(24.dp)
         )
         IconButtonWithElevation(
