@@ -6,11 +6,13 @@ import com.example.feature.main.search.store.SearchStore.Intent
 import com.example.feature.main.search.store.SearchStore.Label
 import com.example.feature.main.search.store.SearchStore.State
 import com.example.data.user.api.model.UserData
+import com.example.feature.main.people.store.PeopleStore
 
 interface SearchStore : Store<Intent, State, Label> {
 
     sealed interface Intent {
         class OnQueryChange(val query: String) : Intent
+        class OpenChat(val chatId: String) : Intent
         data object NavigateBack : Intent
     }
 
@@ -21,6 +23,7 @@ interface SearchStore : Store<Intent, State, Label> {
     )
 
     sealed interface Label {
+        class OpenChat(val chatId: String) : Label
         data object NavigateBack : Label
     }
 }

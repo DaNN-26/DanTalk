@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 
+@OptIn(DelicateDecomposeApi::class)
 class DefaultMainComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
@@ -64,7 +65,6 @@ class DefaultMainComponent(
             )
         }
 
-    @OptIn(DelicateDecomposeApi::class)
     private fun homeComponent(componentContext: ComponentContext) =
         DefaultHomeComponent(
             componentContext = componentContext,
@@ -86,6 +86,7 @@ class DefaultMainComponent(
             userRepository = userRepository,
             userDataFlow = userDataFlow,
             chatRepository = chatRepository,
+            navigateToChat = { navigation.push(Config.Chat(it)) },
             navigateBack = { navigation.pop() }
         )
 
@@ -99,7 +100,6 @@ class DefaultMainComponent(
             navigateBack = { navigation.pop() }
         )
 
-    @OptIn(DelicateDecomposeApi::class)
     private fun peopleComponent(componentContext: ComponentContext) =
         DefaultPeopleComponent(
             componentContext = componentContext,

@@ -42,6 +42,7 @@ class SearchStoreFactory(
                 initialState = State(),
                 executorFactory = coroutineExecutorFactory {
                     onIntent<Intent.OnQueryChange> { onQueryChange(it.query) }
+                    onIntent<Intent.OpenChat> { publish(Label.OpenChat(it.chatId)) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->

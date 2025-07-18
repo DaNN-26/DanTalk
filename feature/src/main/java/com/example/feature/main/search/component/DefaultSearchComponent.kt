@@ -22,7 +22,8 @@ class DefaultSearchComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataFlow: Flow<UserData>,
-    chatRepository: ChatRepository,
+    private val chatRepository: ChatRepository,
+    private val navigateToChat: (String) -> Unit,
     private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, SearchComponent {
 
@@ -48,6 +49,7 @@ class DefaultSearchComponent(
         scope.launch {
             store.labels.collect { label ->
                 when (label) {
+                    is SearchStore.Label.OpenChat -> navigateToChat(label.chatId)
                     is SearchStore.Label.NavigateBack -> navigateBack()
                 }
             }
