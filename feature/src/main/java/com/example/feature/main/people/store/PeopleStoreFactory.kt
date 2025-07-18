@@ -85,8 +85,8 @@ class PeopleStoreFactory(
             val userIds = listOf(state().currentUserId, userId)
             try {
                 withContext(Dispatchers.IO) {
-                    chatRepository.getChatIdByUserId(userIds)
-                }.let { publish(Label.OpenChat(it)) }
+                    chatRepository.getChatByUserIds(userIds)
+                }.let { publish(Label.OpenChat(it.id)) }
             } catch (e: Exception) {
                 withContext(Dispatchers.IO) {
                     chatRepository.createChat(userIds)

@@ -56,6 +56,7 @@ import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.ItemShimmer
+import com.example.core.ui.components.UserDialogInfo
 import com.example.core.ui.components.topbar.SearchTopBar
 import com.example.core.ui.model.UiUserData
 import com.example.feature.main.people.component.PeopleComponent
@@ -104,7 +105,7 @@ private fun Content(
             else ->
                 Box {
                     if (isDialogVisible) {
-                        DialogUserContent(
+                        UserDialogInfo(
                             onDismissRequest = { isDialogVisible = false },
                             onMessageSendClick = {
                                 isDialogVisible = false
@@ -255,117 +256,4 @@ private fun ShimmerContent(
             ItemShimmer()
         }
     }
-}
-
-@Composable
-private fun DialogUserContent(
-    onDismissRequest: () -> Unit,
-    onMessageSendClick: () -> Unit,
-    user: UiUserData,
-) {
-    Dialog(
-        onDismissRequest = onDismissRequest
-    ) {
-        Column(
-            modifier = Modifier
-                .background(DanTalkTheme.colors.altSingleTheme, RoundedCornerShape(16.dp))
-                .padding(horizontal = 10.dp)
-                .padding(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            AsyncImage(
-                model = user.avatar,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(4f / 3f)
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            constraints.copy(
-                                maxWidth = constraints.maxWidth + 2 * 10.dp.roundToPx(),
-                            )
-                        )
-                        layout(placeable.width, placeable.height) {
-                            placeable.place(0, 0)
-                        }
-                    }
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                contentScale = ContentScale.Crop
-            )
-            DialogUserInfoItem(
-                title = "Полное имя",
-                info = "${user.firstname} ${user.lastname} ${user.patronymic}".trim(),
-            )
-            DialogUserInfoItem(
-                title = "Имя пользователя",
-                info = user.username
-            )
-            TextButton(
-                onClick = onMessageSendClick,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.textButtonColors(
-                    containerColor = Color.Transparent,
-                    contentColor = DanTalkTheme.colors.main
-                )
-            ) {
-                Text(
-                    text = "Написать сообщение",
-                    fontSize = 16.sp,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun DialogUserInfoItem(
-    title: String,
-    info: String,
-) {
-    val context = LocalContext.current
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = info,
-                    fontSize = 16.sp,
-                    color = DanTalkTheme.colors.oppositeTheme
-                )
-                Text(
-                    text = title,
-                    fontSize = 14.sp,
-                    color = DanTalkTheme.colors.hint
-                )
-            }
-            IconButton(
-                onClick = {
-                    copyToClipboard(title, info, context)
-                    Toast.makeText(context, "Скопировано в буфер обмена", Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.size(30.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ContentCopy,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-        }
-        HorizontalDivider(
-            color = DanTalkTheme.colors.hint.copy(alpha = 0.3f)
-        )
-    }
-}
-
-private fun copyToClipboard(title: String, info: String, context: Context) {
-    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    val clip = ClipData.newPlainText(title, info)
-    clipboard.setPrimaryClip(clip)
 }

@@ -123,7 +123,7 @@ internal class ChatRepositoryImpl(
         }
     }
 
-    override suspend fun getChatIdByUserId(userIds: List<String>): String =
+    override suspend fun getChatByUserIds(userIds: List<String>): Chat =
         try {
             val documentId = userIds.sorted().joinToString("")
             val snapshot = firestore.collection("chats")
@@ -131,8 +131,10 @@ internal class ChatRepositoryImpl(
                 .get()
                 .await()
 
-            if (!snapshot.exists()) throw Exception("Chat not found")
-            snapshot.id
+            val entity = snapshot.toObject(ChatEntity::class.java)
+                ?: throw Exception("Failed to get chat")
+
+            entity.toDomain(snapshot.id, getChatUsers(entity.users))
         } catch (e: Exception) {
             Log.d("Firestore", "Failed to get chat $e")
             throw e

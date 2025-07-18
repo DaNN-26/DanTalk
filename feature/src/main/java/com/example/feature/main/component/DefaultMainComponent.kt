@@ -85,6 +85,7 @@ class DefaultMainComponent(
             storeFactory = storeFactory,
             userRepository = userRepository,
             userDataFlow = userDataFlow,
+            chatRepository = chatRepository,
             navigateBack = { navigation.pop() }
         )
 

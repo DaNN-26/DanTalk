@@ -86,13 +86,12 @@ private fun Content(
                 )
                 Spacer(Modifier.height(6.dp))
             }
-//            items(state.usersByQuery) {
-//                ChatItem(
-//                    onChatClick = { /*TODO*/ },
-//                    avatar = R.drawable.ic_launcher_background,
-//                    chat =
-//                )
-//            }
+            items(state.chatsByQuery) { chat ->
+                ChatItem(
+                    onChatClick = { /*TODO*/ },
+                    chat = chat
+                )
+            }
         }
     }
 }

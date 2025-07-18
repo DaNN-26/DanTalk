@@ -5,6 +5,7 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.data.user.api.model.UserData
@@ -21,6 +22,7 @@ class DefaultSearchComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataFlow: Flow<UserData>,
+    chatRepository: ChatRepository,
     private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, SearchComponent {
 
@@ -28,7 +30,8 @@ class DefaultSearchComponent(
         SearchStoreFactory(
             factory = storeFactory,
             userRepository = userRepository,
-            userDataFlow = userDataFlow
+            userDataFlow = userDataFlow,
+            chatRepository = chatRepository
         ).create()
     }
 
