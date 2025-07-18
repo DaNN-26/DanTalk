@@ -125,9 +125,9 @@ class ProfileStoreFactory(
 
     private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.loadImageIntoStorage(uri: Uri) {
         launch(Dispatchers.IO) {
-            val image = storageRepository.postImage(uri)
+            val imagePath = storageRepository.postImage(uri)
             withContext(Dispatchers.Main) {
-                state().newUserData.copy(avatar = image.url).let {
+                state().newUserData.copy(avatar = imagePath).let {
                     saveNewUserData(it.toUserData())
                     dispatch(Msg.UpdateNewUserData(it))
                 }

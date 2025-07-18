@@ -46,6 +46,9 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
+    implementation(platform("io.github.jan-tennert.supabase:bom:3.1.0"))
+    implementation("io.github.jan-tennert.supabase:storage-kt")
+
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
     implementation(libs.ktor.client.android)
