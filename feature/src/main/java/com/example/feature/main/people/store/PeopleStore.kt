@@ -1,5 +1,6 @@
 package com.example.feature.main.people.store
 
+import android.content.Context
 import com.arkivanov.mvikotlin.core.store.Store
 import com.example.core.ui.model.UiUserData
 import com.example.feature.main.people.store.PeopleStore.*
@@ -10,6 +11,7 @@ interface PeopleStore : Store<Intent, State, Label> {
     sealed interface Intent {
         class OnQueryChange(val query: String) : Intent
         class OpenChat(val userId: String) : Intent
+        class DownloadImage(val context: Context, val url: String) : Intent
         data object NavigateBack : Intent
     }
 

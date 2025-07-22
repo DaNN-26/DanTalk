@@ -27,20 +27,18 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.core.ui.model.UiMessage
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.model.UiMessage
 import com.example.core.util.toDateString
 
 @Composable
-fun Message(
-    message: UiMessage,
-    currentUserId: String,
-) {
+fun Message(message: UiMessage) {
 
     val arrangement = if (message.isCurrentUserMessage) Arrangement.End else Arrangement.Start
     val paddingValues =
         if (message.isCurrentUserMessage) PaddingValues(start = 60.dp) else PaddingValues(end = 60.dp)
-    val tailAlignment = if (message.isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
+    val tailAlignment =
+        if (message.isCurrentUserMessage) Alignment.BottomEnd else Alignment.BottomStart
     val messageShape = RoundedCornerShape(
         topStart = 16.dp,
         topEnd = 16.dp,
@@ -94,13 +92,13 @@ fun Message(
                     color = DanTalkTheme.colors.hint,
                     fontSize = 10.sp
                 )
-                //if (isCurrentUserMessage)
-                Icon(
-                    imageVector = if (!message.read) Icons.Default.Check else Icons.Default.CheckCircleOutline,
-                    contentDescription = null,
-                    modifier = Modifier.size(12.dp),
-                    tint = DanTalkTheme.colors.hint
-                )
+                if (message.isCurrentUserMessage)
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        modifier = Modifier.size(12.dp),
+                        tint = if(message.read) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
+                    )
             }
         }
     }

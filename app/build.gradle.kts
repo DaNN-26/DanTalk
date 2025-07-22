@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":core"))
     implementation(project(":feature"))
     implementation(project(":data"))
+    implementation(project(":background"))
 
     implementation(libs.koin.androidx.compose)
     implementation(libs.decompose)

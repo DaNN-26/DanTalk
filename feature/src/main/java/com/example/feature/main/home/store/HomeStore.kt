@@ -14,6 +14,7 @@ interface HomeStore : Store<Intent, State, Label> {
         data object NavigateToProfile : Intent
         data object NavigateToPeople : Intent
         class OpenChat(val id: String) : Intent
+        class DeleteChat(val id: String) : Intent
         data object SignOut : Intent
     }
 

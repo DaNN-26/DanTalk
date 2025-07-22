@@ -6,19 +6,25 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -29,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -39,9 +46,13 @@ import com.example.core.ui.model.UiUserData
 @Composable
 fun UserDialogInfo(
     onDismissRequest: () -> Unit,
-    onMessageSendClick: () -> Unit,
+    actionButtonContent: @Composable () -> Unit,
+    onActionButtonClick: () -> Unit,
+    onDownloadButtonClick: () -> Unit,
     user: UiUserData,
 ) {
+    val context = LocalContext.current
+
     Dialog(
         onDismissRequest = onDismissRequest
     ) {
@@ -49,28 +60,39 @@ fun UserDialogInfo(
             modifier = Modifier
                 .background(DanTalkTheme.colors.altSingleTheme, RoundedCornerShape(16.dp))
                 .padding(horizontal = 10.dp)
-                .padding(bottom = 16.dp),
+                .padding(bottom = 16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AsyncImage(
-                model = user.avatar,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(4f / 3f)
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(
-                            constraints.copy(
-                                maxWidth = constraints.maxWidth + 2 * 10.dp.roundToPx(),
+            Box {
+                AsyncImage(
+                    model = user.avatar,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(4f / 3f)
+                        .layout { measurable, constraints ->
+                            val placeable = measurable.measure(
+                                constraints.copy(
+                                    maxWidth = constraints.maxWidth + 2 * 10.dp.roundToPx(),
+                                )
                             )
-                        )
-                        layout(placeable.width, placeable.height) {
-                            placeable.place(0, 0)
+                            layout(placeable.width, placeable.height) {
+                                placeable.place(0, 0)
+                            }
                         }
-                    }
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
-                contentScale = ContentScale.Crop
-            )
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+                IconButtonWithElevation(
+                    onClick = { onDownloadButtonClick() },
+                    modifier = Modifier.align(Alignment.TopEnd),
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = DanTalkTheme.colors.oppositeTheme
+                    ),
+                    icon = Icons.Default.Download
+                )
+            }
             DialogUserInfoItem(
                 title = "Полное имя",
                 info = "${user.firstname} ${user.lastname} ${user.patronymic}".trim(),
@@ -79,18 +101,19 @@ fun UserDialogInfo(
                 title = "Имя пользователя",
                 info = user.username
             )
+            DialogUserInfoItem(
+                title = "Почта",
+                info = user.email
+            )
             TextButton(
-                onClick = onMessageSendClick,
+                onClick = onActionButtonClick,
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 colors = ButtonDefaults.textButtonColors(
                     containerColor = Color.Transparent,
                     contentColor = DanTalkTheme.colors.main
                 )
             ) {
-                Text(
-                    text = "Написать сообщение",
-                    fontSize = 16.sp,
-                )
+                actionButtonContent()
             }
         }
     }
@@ -111,10 +134,14 @@ private fun DialogUserInfoItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
                 Text(
                     text = info,
                     fontSize = 16.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
                     color = DanTalkTheme.colors.oppositeTheme
                 )
                 Text(
@@ -129,6 +156,9 @@ private fun DialogUserInfoItem(
                     Toast.makeText(context, "Скопировано в буфер обмена", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.size(30.dp),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = DanTalkTheme.colors.oppositeTheme
+                )
             ) {
                 Icon(
                     imageVector = Icons.Outlined.ContentCopy,

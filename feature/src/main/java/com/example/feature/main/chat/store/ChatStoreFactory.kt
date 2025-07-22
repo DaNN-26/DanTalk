@@ -6,10 +6,13 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.background.service.ImageLoadServiceStarter
 import com.example.core.ui.model.UiChat
 import com.example.core.util.toDateString
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Message
+import com.example.data.media.api.MediaRepository
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.model.UserData
 import com.example.feature.mapper.toUi
@@ -62,6 +65,7 @@ class ChatStoreFactory(
                     onIntent<Intent.OnMessageChange> { dispatch(Msg.OnMessageChange(it.message)) }
                     onIntent<Intent.SendMessage> { sendMessage() }
                     onIntent<Intent.ReadMessage> { readMessage(it.ids) }
+                    onIntent<Intent.DownloadImage> { ImageLoadServiceStarter.download(it.context, it.url) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->
@@ -100,7 +104,7 @@ class ChatStoreFactory(
         }
     }
 
-    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.readMessage(ids: List<String>) {
+    private fun CoroutineExecutorScope<State, Nothing, Nothing, Nothing>.readMessage(ids: List<String>) {
         if (state().chat == null) return
         launch(Dispatchers.IO) {
             chatRepository.readMessage(chatId, ids)

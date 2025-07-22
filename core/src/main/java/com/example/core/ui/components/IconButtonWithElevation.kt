@@ -31,10 +31,8 @@ fun IconButtonWithElevation(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = contentModifier
-                .offset(x = 2.dp)
-                .blur(4.dp),
-            tint = Color.Black.copy(alpha = 0.3f)
+            modifier = contentModifier.blur(4.dp),
+            tint = Color.Black.copy(alpha = 0.4f)
         )
         Icon(
             imageVector = icon,

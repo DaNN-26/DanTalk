@@ -40,13 +40,7 @@ class SignInStoreFactory(
                 executorFactory = coroutineExecutorFactory {
                     onIntent<Intent.OnEmailChange> { dispatch(Msg.OnEmailChange(it.email)) }
                     onIntent<Intent.OnPasswordChange> { dispatch(Msg.OnPasswordChange(it.password)) }
-                    onIntent<Intent.SignIn> {
-                        validateInput(state().email, state().password)
-                            .let { dispatch(Msg.UpdateValidation(it)) }
-                        if (state().validation !is SignInValidation.Valid) return@onIntent
-                        dispatch(Msg.UpdateLoading(true))
-                        signIn()
-                    }
+                    onIntent<Intent.SignIn> { signIn() }
                     onIntent<Intent.NavigateToSignUp> { publish(Label.NavigateToSignUp) }
                     onIntent<Intent.DismissDialog> {
                         dispatch(Msg.UpdateLoading(isSuccessful = false))
@@ -66,15 +60,13 @@ class SignInStoreFactory(
                 }
             ) {}
 
-    private fun validateInput(email: String, password: String): SignInValidation =
-        when {
-            email.isEmpty() && password.isEmpty() -> SignInValidation.EmptyAllFields
-            email.isEmpty() -> SignInValidation.EmptyEmail
-            password.isEmpty() -> SignInValidation.EmptyPassword
-            else -> SignInValidation.Valid
-        }
-
     private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signIn() {
+        validateInput(state().email, state().password)
+            .let {
+                dispatch(Msg.UpdateValidation(it))
+                if (it !is SignInValidation.Valid) return
+            }
+        dispatch(Msg.UpdateLoading(true))
         launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -94,6 +86,14 @@ class SignInStoreFactory(
             }
         }
     }
+
+    private fun validateInput(email: String, password: String): SignInValidation =
+        when {
+            email.isEmpty() && password.isEmpty() -> SignInValidation.EmptyAllFields
+            email.isEmpty() -> SignInValidation.EmptyEmail
+            password.isEmpty() -> SignInValidation.EmptyPassword
+            else -> SignInValidation.Valid
+        }
 
     private suspend fun saveUserData(userId: String) {
         val userData = userRepository.getUser(userId)

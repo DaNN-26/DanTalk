@@ -16,14 +16,19 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.components.UserDialogInfo
 import com.example.data.chat.api.model.Message
 import com.example.feature.main.chat.component.ChatComponent
 import com.example.feature.main.chat.model.MessageListItem
@@ -53,6 +58,9 @@ private fun Content(
 ) {
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    var isDialogVisible by remember { mutableStateOf(false) }
 
     val firstVisibleDate by remember(state.messages) {
         derivedStateOf {
@@ -110,6 +118,7 @@ private fun Content(
         topBar = {
             ChatTopBar(
                 user = state.chat?.user,
+                onAvatarClick = { isDialogVisible = true },
                 navigateBack = { onIntent(ChatStore.Intent.NavigateBack) }
             )
         },
@@ -127,9 +136,28 @@ private fun Content(
         },
         containerColor = DanTalkTheme.colors.singleTheme
     ) { contentPadding ->
+        if (isDialogVisible && state.chat != null)
+            UserDialogInfo(
+                onDismissRequest = { isDialogVisible = false },
+                actionButtonContent = {
+                    Text(
+                        text = "Посмотреть вложения",
+                        fontSize = 16.sp
+                    )
+                },
+                onActionButtonClick = { /*TODO*/ },
+                onDownloadButtonClick = {
+                    onIntent(ChatStore.Intent.DownloadImage(
+                        context = context,
+                        url = state.chat.user.avatar
+                    ))
+                },
+                user = state.chat.user
+            )
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .blur(if (isDialogVisible) 3.dp else 0.dp)
                 .padding(contentPadding),
             contentAlignment = Alignment.TopCenter
         ) {
@@ -144,11 +172,8 @@ private fun Content(
                     ) {
                         items(state.messages) { item ->
                             when (item) {
-                                is MessageListItem.DateItem -> MessagesDate(date = item.date)
-                                is MessageListItem.MessageItem -> Message(
-                                    message = item.message,
-                                    currentUserId = state.currentUser.id
-                                )
+                                is MessageListItem.DateItem -> MessagesDate(item.date)
+                                is MessageListItem.MessageItem -> Message(item.message)
                             }
                         }
                     }

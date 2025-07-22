@@ -6,8 +6,11 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.background.service.ImageLoadServiceStarter
 import com.example.core.ui.model.UiUserData
 import com.example.data.chat.api.ChatRepository
+import com.example.data.media.api.MediaRepository
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserRepository
 import com.example.data.user.api.model.UserData
 import com.example.feature.main.people.store.PeopleStore.Intent
@@ -46,6 +49,7 @@ class PeopleStoreFactory(
                     onAction<Action.SetUserId> { dispatch(Msg.SetUserId(it.userId)) }
                     onIntent<Intent.OnQueryChange> { getUsersByQuery(it.query) }
                     onIntent<Intent.OpenChat> { getChatIdByUserId(it.userId) }
+                    onIntent<Intent.DownloadImage> { ImageLoadServiceStarter.download(it.context, it.url) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->

@@ -8,7 +8,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import com.example.core.ui.model.UiChat
 import com.example.core.ui.model.UiUserData
-import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Chat
 import com.example.data.user.api.model.UserData
@@ -29,7 +28,7 @@ class HomeStoreFactory(
     private val factory: StoreFactory,
     private val chatRepository: ChatRepository,
     private val userDataFlow: Flow<UserData>,
-    private val clearUserData: () -> Unit
+    private val clearUserData: () -> Unit,
 ) {
     private sealed interface Action {
         class GetChats(val chats: List<UiChat>) : Action
@@ -57,6 +56,7 @@ class HomeStoreFactory(
                     onIntent<Intent.NavigateToProfile> { publish(Label.NavigateToProfile) }
                     onIntent<Intent.NavigateToPeople> { publish(Label.NavigateToPeople) }
                     onIntent<Intent.OpenChat> { publish(Label.NavigateToChat(it.id)) }
+                    onIntent<Intent.DeleteChat> { launch { deleteChat(it.id) } }
                     onIntent<Intent.SignOut> { signOut() }
                 },
                 reducer = { msg ->
@@ -103,6 +103,9 @@ class HomeStoreFactory(
             }
         }
 
+    private suspend fun deleteChat(id: String) = withContext(Dispatchers.IO) {
+        chatRepository.deleteChat(id)
+    }
 
     private fun CoroutineExecutorScope<State, Nothing, Nothing, Label>.signOut() {
         clearUserData()

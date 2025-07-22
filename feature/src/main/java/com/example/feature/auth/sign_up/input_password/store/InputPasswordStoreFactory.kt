@@ -41,18 +41,8 @@ class InputPasswordStoreFactory(
                 initialState = State(),
                 executorFactory = coroutineExecutorFactory {
                     onIntent<Intent.OnPasswordChange> { dispatch(Msg.OnPasswordChange(it.password)) }
-                    onIntent<Intent.OnRepeatablePasswordChange> { dispatch(
-                        Msg.OnRepeatablePasswordChange(
-                            it.repeatablePassword
-                        )
-                    ) }
-                    onIntent<Intent.SignUp> {
-                        validatePassword(state().password, state().repeatablePassword)
-                            .let { dispatch(Msg.UpdateValidation(it)) }
-                        if (state().validation != InputPasswordValidation.Valid) return@onIntent
-                        dispatch(Msg.UpdateLoading(true))
-                        launch { signUp() }
-                    }
+                    onIntent<Intent.OnRepeatablePasswordChange> { dispatch(Msg.OnRepeatablePasswordChange(it.repeatablePassword)) }
+                    onIntent<Intent.SignUp> { signUp() }
                     onIntent<Intent.DismissDialog> {
                         dispatch(Msg.UpdateLoading(isSuccessful = false))
                         publish(Label.NavigateToHome)
@@ -72,6 +62,32 @@ class InputPasswordStoreFactory(
                 }
             ) {}
 
+    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signUp() {
+        validatePassword(state().password, state().repeatablePassword)
+            .let {
+                dispatch(Msg.UpdateValidation(it))
+                if (it != InputPasswordValidation.Valid) return
+            }
+        dispatch(Msg.UpdateLoading(true))
+        launch {
+            try {
+                withContext(Dispatchers.IO) {
+                    val userId = authRepository.createUser(currentUserData.email, state().password)
+                    saveUserData(userId)
+                }
+                dispatch(Msg.UpdateLoading(isSuccessful = true))
+            } catch (e: SignUpException) {
+                val validation = when (e) {
+                    is SignUpException.WeakPasswordException -> InputPasswordValidation.PasswordIsTooShort
+                    is SignUpException.NetworkException -> InputPasswordValidation.NetworkError
+                    else -> InputPasswordValidation.NetworkError
+                }
+                dispatch(Msg.UpdateLoading(isLoading = false))
+                dispatch(Msg.UpdateValidation(validation))
+            }
+        }
+    }
+
     private fun validatePassword(
         password: String,
         repeatablePassword: String,
@@ -81,23 +97,6 @@ class InputPasswordStoreFactory(
             password != repeatablePassword -> InputPasswordValidation.NotMatchesPasswords
             else -> InputPasswordValidation.Valid
         }
-
-    private suspend fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.signUp() {
-        withContext(Dispatchers.IO) {
-            authRepository.createUser(currentUserData.email, state().password)
-        }.onSuccess { uid ->
-            saveUserData(uid)
-            dispatch(Msg.UpdateLoading(isSuccessful = true))
-        }.onFailure {
-            val validation = when (it) {
-                is SignUpException.WeakPasswordException -> InputPasswordValidation.PasswordIsTooShort
-                is SignUpException.NetworkException -> InputPasswordValidation.NetworkError
-                else -> InputPasswordValidation.NetworkError
-            }
-            dispatch(Msg.UpdateLoading(isLoading = false))
-            dispatch(Msg.UpdateValidation(validation))
-        }
-    }
 
     private suspend fun saveUserData(userId: String) = withContext(Dispatchers.IO) {
         val userData = currentUserData.copy(id = userId)

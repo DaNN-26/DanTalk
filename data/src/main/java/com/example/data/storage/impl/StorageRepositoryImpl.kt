@@ -13,17 +13,25 @@ internal class StorageRepositoryImpl(
     private val client: SupabaseClient,
     private val context: Context
 ) : StorageRepository {
+
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun postImage(uri: Uri): String {
         val inputStream = context.contentResolver.openInputStream(uri)!!
         val bytes = inputStream.readBytes()
         val id = Uuid.random().toString()
         val bucket = client.storage.from("avatar")
-        bucket.upload("$id.png", bytes) {
+        bucket.upload("$id.jpg", bytes) {
             upsert = false
         }.let { response ->
             val storagePath = "https://xkmiymytxnnljfpbyagk.supabase.co/storage/v1/object/public/avatar//"
             return storagePath + response.path
         }
+    }
+
+    override suspend fun downloadImage(url: String): ByteArray {
+        val filename = url.split("/").last()
+        val bucket = client.storage.from("avatar")
+        val bytes = bucket.downloadPublic(filename)
+        return bytes
     }
 }

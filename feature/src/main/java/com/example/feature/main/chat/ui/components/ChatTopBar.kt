@@ -27,6 +27,7 @@ import com.valentinilk.shimmer.shimmer
 @Composable
 fun ChatTopBar(
     user: UiUserData?,
+    onAvatarClick: () -> Unit,
     navigateBack: () -> Unit,
 ) {
     CenterAlignedTopAppBar(
@@ -57,7 +58,7 @@ fun ChatTopBar(
         },
         actions = {
             IconButton(
-                onClick = { /*TODO*/ }
+                onClick = onAvatarClick
             ) {
                 if (user != null)
                     AsyncImage(

@@ -1,5 +1,6 @@
 package com.example.feature.main.profile.store
 
+import android.content.Context
 import android.net.Uri
 import com.arkivanov.mvikotlin.core.store.Store
 import com.example.core.ui.model.UiUserData
@@ -14,7 +15,7 @@ interface ProfileStore : Store<Intent, State, Label> {
     sealed interface Intent {
         class UpdateNewUserData(val newUserData: UiUserData) : Intent
         data object SaveNewUserData : Intent
-        class LoadImageIntoStorage(val uri: Uri) : Intent
+        class LoadImageIntoStorage(val context: Context, val uri: Uri) : Intent
         data object NavigateBack : Intent
     }
 

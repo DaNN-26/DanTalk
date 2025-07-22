@@ -9,6 +9,7 @@ import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
 import com.example.core.design.theme.DanTalkTheme
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
+import com.example.data.media.api.MediaRepository
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
@@ -31,7 +32,8 @@ class MainActivity : ComponentActivity() {
             userRepository = getKoin().get<UserRepository>(),
             chatRepository = getKoin().get<ChatRepository>(),
             userDataStoreRepository = getKoin().get<UserDataStoreRepository>(),
-            storageRepository = getKoin().get<StorageRepository>()
+            storageRepository = getKoin().get<StorageRepository>(),
+            mediaRepository = getKoin().get<MediaRepository>()
         )
         enableEdgeToEdge()
         setContent {

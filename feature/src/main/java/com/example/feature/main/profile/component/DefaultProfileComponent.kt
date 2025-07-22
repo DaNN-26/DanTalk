@@ -21,7 +21,6 @@ class DefaultProfileComponent(
     private val storeFactory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
-    private val storageRepository: StorageRepository,
     private val navigateBack: () -> Unit
 ) : ComponentContext by componentContext, ProfileComponent {
 
@@ -30,7 +29,6 @@ class DefaultProfileComponent(
             factory = storeFactory,
             userRepository = userRepository,
             userDataStoreRepository = userDataStoreRepository,
-            storageRepository = storageRepository
         ).create()
     }
 

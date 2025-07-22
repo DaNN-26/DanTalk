@@ -65,9 +65,21 @@ internal class ChatRepositoryImpl(
     }
 
     override suspend fun deleteChat(id: String) {
-        firestore.collection("chats").document(id)
+        firestore.collection("chats")
+            .document(id)
             .delete()
             .await()
+
+        firestore.collection("chats")
+            .document(id)
+            .collection("messages")
+            .get()
+            .await()
+            .let { snapshot ->
+                snapshot.documents.forEach { doc ->
+                    doc.reference.delete().await()
+                }
+            }
     }
 
     override suspend fun getChat(id: String): Chat =

@@ -6,6 +6,8 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
 import com.example.data.chat.api.ChatRepository
+import com.example.data.media.api.MediaRepository
+import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.model.UserData
 import com.example.feature.main.chat.component.ChatComponent

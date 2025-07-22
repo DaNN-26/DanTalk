@@ -16,12 +16,12 @@ import kotlin.coroutines.suspendCoroutine
 internal class AuthRepositoryImpl(
     private val firebaseAuth: FirebaseAuth,
 ) : AuthRepository {
-    override suspend fun createUser(email: String, password: String) : Result<String> =
+    override suspend fun createUser(email: String, password: String) : String =
         suspendCoroutine { continuation ->
             firebaseAuth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener {
                     val user = firebaseAuth.currentUser
-                    if (user != null) continuation.resume(success(user.uid))
+                    if (user != null) continuation.resume(user.uid)
                 }
                 .addOnFailureListener {
                     continuation.resumeWithException(

@@ -7,6 +7,7 @@ import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.background.service.ImageLoadServiceStarter
 import com.example.core.ui.model.UiUserData
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
@@ -25,7 +26,6 @@ class ProfileStoreFactory(
     private val factory: StoreFactory,
     private val userRepository: UserRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
-    private val storageRepository: StorageRepository,
 ) {
     sealed interface Action {
         class SetUser(val user: UiUserData) : Action
@@ -55,7 +55,7 @@ class ProfileStoreFactory(
                     onAction<Action.SetUser> { dispatch(Msg.SetUser(it.user)) }
                     onIntent<Intent.UpdateNewUserData> { dispatch(Msg.UpdateNewUserData(it.newUserData)) }
                     onIntent<Intent.SaveNewUserData> { saveNewUserData() }
-                    onIntent<Intent.LoadImageIntoStorage> { loadImageIntoStorage(it.uri)}
+                    onIntent<Intent.LoadImageIntoStorage> { ImageLoadServiceStarter.post(it.context, it.uri) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->
@@ -121,18 +121,6 @@ class ProfileStoreFactory(
     private suspend fun saveNewUserData(newUserData: UserData) = withContext(Dispatchers.IO) {
         userRepository.updateUser(newUserData)
         userDataStoreRepository.saveUserData(newUserData)
-    }
-
-    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.loadImageIntoStorage(uri: Uri) {
-        launch(Dispatchers.IO) {
-            val imagePath = storageRepository.postImage(uri)
-            withContext(Dispatchers.Main) {
-                state().newUserData.copy(avatar = imagePath).let {
-                    saveNewUserData(it.toUserData())
-                    dispatch(Msg.UpdateNewUserData(it))
-                }
-            }
-        }
     }
 
     private fun UiUserData.toUserData(): UserData =

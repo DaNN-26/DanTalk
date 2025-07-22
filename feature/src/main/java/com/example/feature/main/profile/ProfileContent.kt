@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -88,6 +89,7 @@ private fun Content(
     onIntent: (ProfileStore.Intent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     val sheetState = rememberModalBottomSheetState(true)
     var sheetIsVisible by remember { mutableStateOf(false) }
@@ -169,7 +171,7 @@ private fun Content(
     }
 
     val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) onIntent(ProfileStore.Intent.LoadImageIntoStorage(uri))
+        if (uri != null) onIntent(ProfileStore.Intent.LoadImageIntoStorage(context, uri))
     }
 
     Scaffold(

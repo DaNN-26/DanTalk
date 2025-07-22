@@ -1,5 +1,6 @@
 package com.example.feature.main.chat.store
 
+import android.content.Context
 import com.arkivanov.mvikotlin.core.store.Store
 import com.example.core.ui.model.UiChat
 import com.example.feature.main.chat.store.ChatStore.*
@@ -13,6 +14,7 @@ interface ChatStore : Store<Intent, State, Label> {
         class OnMessageChange(val message: String) : Intent
         data object SendMessage : Intent
         class ReadMessage(val ids: List<String>) : Intent
+        class DownloadImage(val context: Context, val url: String) : Intent
         data object NavigateBack : Intent
     }
 

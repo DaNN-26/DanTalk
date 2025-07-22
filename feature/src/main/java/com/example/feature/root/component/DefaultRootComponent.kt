@@ -7,6 +7,7 @@ import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
+import com.example.data.media.api.MediaRepository
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
@@ -27,6 +28,7 @@ class DefaultRootComponent(
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
     private val storageRepository: StorageRepository,
+    private val mediaRepository: MediaRepository,
 ) : ComponentContext by componentContext, RootComponent {
 
     private val navigation = StackNavigation<Config>()
@@ -79,6 +81,7 @@ class DefaultRootComponent(
             chatRepository = chatRepository,
             userDataStoreRepository = userDataStoreRepository,
             storageRepository = storageRepository,
+            mediaRepository = mediaRepository,
             clearUserData = ::clearUserData,
             navigateToAuth = { navigation.replaceAll(Config.Auth) }
         )
