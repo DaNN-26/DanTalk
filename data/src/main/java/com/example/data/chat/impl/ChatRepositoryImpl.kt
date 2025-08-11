@@ -48,7 +48,7 @@ internal class ChatRepositoryImpl(
         awaitClose { listener.remove() }
     }
 
-    override suspend fun createChat(userIds: List<String>) : String {
+    override suspend fun createChat(userIds: List<String>): String {
         val chatId = userIds.sorted().joinToString("")
         val users = listOf(
             firestore.collection("users").document(userIds[0]),
@@ -102,9 +102,13 @@ internal class ChatRepositoryImpl(
         firestore.collection("chats")
             .document(chatId)
             .collection("messages")
-            .document()
-            .set(message.toEntity())
-            .await()
+            .add(message.toEntity())
+            .addOnSuccessListener { docRef ->
+                docRef.update("pending", false)
+            }
+            .addOnFailureListener {
+                Log.d("Firestore", "Failed to send message")
+            }
     }
 
     override fun getChatMessages(chatId: String): Flow<List<Message>> = callbackFlow {

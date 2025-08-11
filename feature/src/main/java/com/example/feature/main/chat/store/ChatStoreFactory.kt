@@ -1,5 +1,7 @@
 package com.example.feature.main.chat.store
 
+import android.net.Uri
+import android.util.Log
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
@@ -8,26 +10,28 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import com.example.background.service.ImageLoadServiceStarter
 import com.example.core.ui.model.UiChat
+import com.example.core.ui.model.UiMessage
 import com.example.core.util.toDateString
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Message
-import com.example.data.media.api.MediaRepository
 import com.example.data.storage.api.StorageRepository
-import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.model.UserData
-import com.example.feature.mapper.toUi
 import com.example.feature.main.chat.model.MessageListItem
 import com.example.feature.main.chat.store.ChatStore.Intent
 import com.example.feature.main.chat.store.ChatStore.Label
 import com.example.feature.main.chat.store.ChatStore.State
+import com.example.feature.mapper.toUi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 class ChatStoreFactory(
     private val factory: StoreFactory,
     private val chatRepository: ChatRepository,
+    private val storageRepository: StorageRepository,
     private val userDataFlow: Flow<UserData>,
     private val chatId: String,
 ) {
@@ -64,8 +68,24 @@ class ChatStoreFactory(
                     onAction<Action.SetUser> { dispatch(Msg.SetUser(it.user)) }
                     onIntent<Intent.OnMessageChange> { dispatch(Msg.OnMessageChange(it.message)) }
                     onIntent<Intent.SendMessage> { sendMessage() }
+                    onIntent<Intent.SendPhoto> {
+                        try {
+                            ImageLoadServiceStarter.postMessageImage(
+                                context = it.context,
+                                chatId = chatId,
+                                uri = it.uri
+                            )
+                        } catch (e: Exception) {
+                            Log.d("ChatStore", e.message.toString())
+                        }
+                    }
                     onIntent<Intent.ReadMessage> { readMessage(it.ids) }
-                    onIntent<Intent.DownloadImage> { ImageLoadServiceStarter.download(it.context, it.url) }
+                    onIntent<Intent.DownloadImage> {
+                        ImageLoadServiceStarter.download(
+                            context = it.context,
+                            url = it.url
+                        )
+                    }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->
@@ -90,19 +110,32 @@ class ChatStoreFactory(
             }
         }
 
+    @OptIn(ExperimentalUuidApi::class)
     private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.sendMessage() {
         if (state().currentMessage.isBlank()) return
-        launch {
-            val message = Message(
-                sender = state().currentUser.id,
-                message = state().currentMessage.trim()
-            )
-            dispatch(Msg.ClearMessage)
-            withContext(Dispatchers.IO) {
-                chatRepository.sendMessage(chatId, message)
-            }
+        val message = Message(
+            id = Uuid.random().toString(),
+            sender = state().currentUser.id,
+            message = state().currentMessage.trim()
+        )
+        dispatch(Msg.ClearMessage)
+        launch(Dispatchers.IO) {
+            chatRepository.sendMessage(chatId, message)
         }
     }
+
+//    private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.sendPhoto(uri: Uri) {
+//        launch(Dispatchers.IO) {
+//            val imagePath = storageRepository.postMessageImage(uri)
+//            withContext(Dispatchers.Main) {
+//                Message(
+//                    sender = state().currentUser.id,
+//                    message = imagePath,
+//                    isPhoto = true
+//                )
+//            }.let { message -> chatRepository.sendMessage(chatId, message) }
+//        }
+//    }
 
     private fun CoroutineExecutorScope<State, Nothing, Nothing, Nothing>.readMessage(ids: List<String>) {
         if (state().chat == null) return

@@ -5,5 +5,7 @@ data class Message(
     val sender: String = "",
     val message: String = "",
     val read: Boolean = false,
+    val isPending: Boolean = true,
+    val isPhoto: Boolean = false,
     val sentAt: Long = System.currentTimeMillis()
 )

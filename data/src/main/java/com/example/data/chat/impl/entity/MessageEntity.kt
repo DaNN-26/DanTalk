@@ -4,5 +4,7 @@ internal data class MessageEntity(
     val sender: String = "",
     val message: String = "",
     val read: Boolean = false,
+    val pending: Boolean = true,
+    val photo: Boolean = false,
     val sentAt: Long = System.currentTimeMillis()
 )

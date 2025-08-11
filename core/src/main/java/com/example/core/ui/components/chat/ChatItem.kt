@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -84,21 +86,32 @@ fun ChatItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        text = chat.lastMessage?.message ?: "Нет сообщений",
-                        modifier = Modifier.weight(1f),
-                        fontSize = 16.sp,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        color = DanTalkTheme.colors.hint
-                    )
-                    chat.unreadMessagesCount.let {
-                        if (it > 0) NewMessagesIndicator(it)
-                    }
-
-                    chat.lastMessage.let {
-                        if (it != null && it.isCurrentUserMessage)
-                            CheckMark(it.read)
+                    chat.lastMessage.let { lastMsg ->
+                        if (lastMsg?.isPhoto == true)
+                            LastPhotoMessage(
+                                url = lastMsg.message,
+                                modifier = Modifier.weight(1f)
+                            )
+                        else
+                            Text(
+                                text = if (lastMsg?.isCurrentUserMessage == true)
+                                    "Вы: ${lastMsg.message}"
+                                else lastMsg?.message ?: "Нет сообщений",
+                                modifier = Modifier.weight(1f),
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Normal,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                color = DanTalkTheme.colors.hint
+                            )
+                        chat.unreadMessagesCount.let {
+                            if (it > 0) NewMessagesIndicator(it)
+                        }
+                        if (chat.unreadMessagesCount < 1 && lastMsg != null && lastMsg.isCurrentUserMessage)
+                            MessageStatus(
+                                isRead = lastMsg.read,
+                                isPending = lastMsg.isPending
+                            )
                     }
                 }
             }
@@ -133,13 +146,43 @@ private fun NewMessagesIndicator(
 }
 
 @Composable
-private fun CheckMark(
+private fun MessageStatus(
     isRead: Boolean,
+    isPending: Boolean
 ) {
     Icon(
-        imageVector = Icons.Default.Check,
+        imageVector = if(isPending) Icons.Default.Pending else Icons.Default.Check,
         contentDescription = null,
         modifier = Modifier.size(18.dp),
-        tint = if (isRead) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
+        tint = if (!isPending && isRead) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
     )
+}
+
+@Composable
+private fun LastPhotoMessage(
+    url: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        AsyncImage(
+            model = url,
+            contentDescription = null,
+            modifier = Modifier
+                .size(20.dp)
+                .clip(RoundedCornerShape(4.dp)),
+            contentScale = ContentScale.Crop
+        )
+        Text(
+            text = "Изображение",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            color = DanTalkTheme.colors.main
+        )
+    }
 }

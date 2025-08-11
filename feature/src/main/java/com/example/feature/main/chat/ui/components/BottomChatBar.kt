@@ -31,6 +31,7 @@ fun BottomChatBar(
     message: String,
     onMessageChange: (String) -> Unit,
     sendMessage: () -> Unit,
+    sendPhoto: () -> Unit
 ) {
     BasicTextField(
         value = message,
@@ -67,7 +68,7 @@ fun BottomChatBar(
                 }
                 Row {
                     IconButton(
-                        onClick = { /*TODO*/ },
+                        onClick = sendPhoto,
                         colors = IconButtonDefaults.iconButtonColors(
                             contentColor = DanTalkTheme.colors.oppositeTheme
                         )

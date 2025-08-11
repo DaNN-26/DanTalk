@@ -1,6 +1,5 @@
 package com.example.feature.main.profile.store
 
-import android.net.Uri
 import android.util.Patterns
 import com.arkivanov.mvikotlin.core.store.Store
 import com.arkivanov.mvikotlin.core.store.StoreFactory
@@ -9,7 +8,6 @@ import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
 import com.example.background.service.ImageLoadServiceStarter
 import com.example.core.ui.model.UiUserData
-import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
 import com.example.data.user.api.model.UserData
@@ -55,7 +53,7 @@ class ProfileStoreFactory(
                     onAction<Action.SetUser> { dispatch(Msg.SetUser(it.user)) }
                     onIntent<Intent.UpdateNewUserData> { dispatch(Msg.UpdateNewUserData(it.newUserData)) }
                     onIntent<Intent.SaveNewUserData> { saveNewUserData() }
-                    onIntent<Intent.LoadImageIntoStorage> { ImageLoadServiceStarter.post(it.context, it.uri) }
+                    onIntent<Intent.LoadImageIntoStorage> { ImageLoadServiceStarter.postAvatar(it.context, it.uri) }
                     onIntent<Intent.NavigateBack> { publish(Label.NavigateBack) }
                 },
                 reducer = { msg ->

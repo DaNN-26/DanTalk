@@ -6,9 +6,18 @@ import android.net.Uri
 import androidx.core.content.ContextCompat
 
 object ImageLoadServiceStarter {
-    fun post(context: Context, uri: Uri) {
+    fun postAvatar(context: Context, uri: Uri) {
         val intent = Intent(context, ImageLoadService::class.java).apply {
-            putExtra("action", "POST")
+            putExtra("action", "POST_AVATAR")
+            putExtra("uri", uri)
+        }
+        ContextCompat.startForegroundService(context, intent)
+    }
+
+    fun postMessageImage(context: Context, chatId: String, uri: Uri) {
+        val intent = Intent(context, ImageLoadService::class.java).apply {
+            putExtra("action", "POST_MESSAGE_IMAGE")
+            putExtra("chat_id", chatId)
             putExtra("uri", uri)
         }
         ContextCompat.startForegroundService(context, intent)

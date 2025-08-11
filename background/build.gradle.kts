@@ -36,6 +36,11 @@ dependencies {
     implementation(project(":data"))
 
     implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.workmanager)
+
+    implementation(libs.work.runtime.ktx)
+
+    implementation(libs.firebase.firestore)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

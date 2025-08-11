@@ -120,6 +120,7 @@ class DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             chatRepository = chatRepository,
+            storageRepository = storageRepository,
             userDataFlow = userDataFlow,
             chatId = config.id,
             navigateBack = { navigation.pop() }

@@ -51,6 +51,8 @@ dependencies {
     implementation(project(":background"))
 
     implementation(libs.koin.androidx.compose)
+    implementation(libs.koin.androidx.workmanager)
+    implementation(libs.work.runtime.ktx)
     implementation(libs.decompose)
     implementation(libs.mvikotlin.core)
     implementation(libs.mvikotlin.main)

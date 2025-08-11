@@ -5,6 +5,8 @@ data class UiMessage(
     val isCurrentUserMessage: Boolean,
     val message: String,
     val read: Boolean,
+    val isPending: Boolean,
+    val isPhoto: Boolean,
     val date: String,
     val time: String
 )

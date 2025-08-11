@@ -23,6 +23,7 @@ class DefaultChatComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
     private val chatRepository: ChatRepository,
+    private val storageRepository: StorageRepository,
     private val userDataFlow: Flow<UserData>,
     private val chatId: String,
     private val navigateBack: () -> Unit
@@ -32,6 +33,7 @@ class DefaultChatComponent(
         ChatStoreFactory(
             factory = storeFactory,
             chatRepository = chatRepository,
+            storageRepository = storageRepository,
             userDataFlow = userDataFlow,
             chatId = chatId
         ).create()

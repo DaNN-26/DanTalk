@@ -1,6 +1,8 @@
 package com.example.feature.main.chat.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,25 +10,43 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircleOutline
+import androidx.compose.material.icons.filled.Pending
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import coil3.compose.AsyncImagePainter
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.size.Size
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.model.UiMessage
 import com.example.core.util.toDateString
@@ -68,13 +88,17 @@ fun Message(message: UiMessage) {
                         )
                         .padding(10.dp)
                 ) {
-                    Text(
-                        text = message.message,
-                        color = if (message.isCurrentUserMessage)
-                            Color.White
-                        else
-                            DanTalkTheme.colors.oppositeTheme
-                    )
+                    if (!message.isPhoto)
+                        Text(
+                            text = message.message,
+                            color = if (message.isCurrentUserMessage)
+                                Color.White
+                            else
+                                DanTalkTheme.colors.oppositeTheme
+                        )
+                    else
+                        MessagePhoto(message.message)
+
                 }
                 MessageTail(
                     isCurrentUserMessage = message.isCurrentUserMessage
@@ -94,10 +118,10 @@ fun Message(message: UiMessage) {
                 )
                 if (message.isCurrentUserMessage)
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        imageVector = if(!message.isPending) Icons.Default.Check else Icons.Default.Pending,
                         contentDescription = null,
                         modifier = Modifier.size(12.dp),
-                        tint = if(message.read) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
+                        tint = if (message.read) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
                     )
             }
         }
@@ -170,5 +194,65 @@ private fun MessageTail(
             close()
         }
         drawPath(path, color = tailColor)
+    }
+}
+
+@Composable
+private fun MessagePhoto(
+    url: String
+) {
+    var aspectRatio by remember { mutableFloatStateOf(1f) }
+
+    val context = LocalContext.current
+    val request = ImageRequest.Builder(context)
+        .data(url)
+        .size(Size.ORIGINAL)
+        .listener(
+            onSuccess = { _, result ->
+                val width = result.image.width
+                val height = result.image.height
+                if (width > 0 && height > 0)
+                    aspectRatio = width.toFloat() / height.toFloat()
+            }
+        )
+        .build()
+
+    val painter = rememberAsyncImagePainter(request)
+    val state by painter.state.collectAsState()
+
+    Box(
+        modifier = Modifier
+            .widthIn(max = 240.dp)
+            .aspectRatio(aspectRatio),
+        contentAlignment = Alignment.Center
+    ) {
+        when (state) {
+            is AsyncImagePainter.State.Loading -> {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            is AsyncImagePainter.State.Error -> {
+                Text(
+                    text = "Не удалось загрузить фото",
+                    color = Color.White
+                )
+            }
+
+            is AsyncImagePainter.State.Success -> {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            is AsyncImagePainter.State.Empty -> {
+                Log.d("MessagePhoto", "Empty")
+            }
+        }
     }
 }

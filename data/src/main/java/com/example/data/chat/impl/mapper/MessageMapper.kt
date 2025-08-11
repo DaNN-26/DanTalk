@@ -8,6 +8,8 @@ internal fun Message.toEntity() =
         sender = sender,
         message = message,
         read = read,
+        pending = isPending,
+        photo = isPhoto,
         sentAt = sentAt
     )
 
@@ -17,5 +19,7 @@ internal fun MessageEntity.toDomain(id: String) =
         sender = sender,
         message = message,
         read = read,
+        isPending = pending,
+        isPhoto = photo,
         sentAt = sentAt
     )

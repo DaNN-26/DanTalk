@@ -1,14 +1,15 @@
 package com.example.background.service
 
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import com.example.background.service.notification.createNotification
-import com.example.background.service.notification.showSuccessNotification
+import com.example.background.service.notification.showCompletionNotification
+import com.example.data.chat.api.ChatRepository
+import com.example.data.chat.api.model.Message
 import com.example.data.media.api.MediaRepository
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
@@ -28,14 +29,27 @@ class ImageLoadService : Service() {
         startForeground(1, notification)
 
         when (action) {
-            "POST" -> {
+            "POST_AVATAR" -> {
                 val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra("uri", Uri::class.java)
                 } else {
                     intent.getParcelableExtra("uri")
                 }
                 if (uri != null)
-                    post(uri)
+                    postAvatar(uri)
+                else
+                    stopSelf()
+            }
+
+            "POST_MESSAGE_IMAGE" -> {
+                val chatId = intent.getStringExtra("chat_id")
+                val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra("uri", Uri::class.java)
+                } else {
+                    intent.getParcelableExtra("uri")
+                }
+                if(chatId != null && uri != null)
+                    postMessageImage(chatId, uri)
                 else
                     stopSelf()
             }
@@ -52,21 +66,43 @@ class ImageLoadService : Service() {
         return START_NOT_STICKY
     }
 
-    private fun post(uri: Uri) {
+    private fun postAvatar(uri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val storageRepo = get<StorageRepository>()
                 val userDataStoreRepo = get<UserDataStoreRepository>()
                 val userRepo = get<UserRepository>()
-                val url = storageRepo.postImage(uri)
+                val url = storageRepo.postAvatarImage(uri)
                 userDataStoreRepo.getUserData.first().let { userData ->
                     userDataStoreRepo.saveUserData(userData.copy(avatar = url))
                     userRepo.updateUser(userData.copy(avatar = url))
                 }
-                showSuccessNotification(this@ImageLoadService, "Аватар успешно загружен")
+                showCompletionNotification(this@ImageLoadService, "Аватар успешно загружен")
                 stopSelf()
             } catch (e: Exception) {
                 Log.e("ImageLoadService", e.message.toString())
+                stopSelf()
+            }
+        }
+    }
+
+    private fun postMessageImage(chatId: String, uri: Uri) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val storageRepo = get<StorageRepository>()
+                val userDataStoreRepo = get<UserDataStoreRepository>()
+                val chatRepo = get<ChatRepository>()
+                val url = storageRepo.postMessageImage(uri)
+                val message = Message(
+                    sender = userDataStoreRepo.getUserData.first().id,
+                    message = url,
+                    isPhoto = true
+                )
+                chatRepo.sendMessage(chatId, message)
+                showCompletionNotification(this@ImageLoadService, "Изображение успешно загружено")
+                stopSelf()
+            } catch (e: Exception) {
+                showCompletionNotification(this@ImageLoadService, "Изображение не загружено")
                 stopSelf()
             }
         }
@@ -77,9 +113,9 @@ class ImageLoadService : Service() {
             try {
                 val storageRepo = get<StorageRepository>()
                 val mediaRepo = get<MediaRepository>()
-                val image = storageRepo.downloadImage(url)
+                val image = storageRepo.downloadAvatarImage(url)
                 mediaRepo.saveImageToGallery(image).let { uri ->
-                    if (uri != null) showSuccessNotification(this@ImageLoadService, "Изображение успешно загружено на устройство")
+                    if (uri != null) showCompletionNotification(this@ImageLoadService, "Изображение успешно загружено на устройство")
                 }
                 stopSelf()
             } catch (e: Exception) {

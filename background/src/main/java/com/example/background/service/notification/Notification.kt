@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.IconCompat
 import com.example.background.R
 
 const val IMAGE_LOAD_CHANNEL_ID = "image_load_channel"
@@ -38,7 +37,7 @@ fun createNotification(context: Context, contentText: String, isOngoing: Boolean
         .build()
 }
 
-fun showSuccessNotification(context: Context, text: String) {
+fun showCompletionNotification(context: Context, text: String) {
     val notification = createNotification(context, text, false)
     val notifyManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notifyManager.notify(2, notification)

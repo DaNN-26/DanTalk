@@ -11,6 +11,8 @@ internal fun Message.toUi(currentUserId: String) =
         isCurrentUserMessage = sender == currentUserId,
         message = message,
         read = read,
+        isPending = isPending,
+        isPhoto = isPhoto,
         date = sentAt.toDateString(),
         time = sentAt.toTimeString()
     )

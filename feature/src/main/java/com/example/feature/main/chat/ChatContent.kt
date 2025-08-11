@@ -1,5 +1,7 @@
 package com.example.feature.main.chat
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +61,11 @@ private fun Content(
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    val photoLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) onIntent(ChatStore.Intent.SendPhoto(context, uri))
+        }
 
     var isDialogVisible by remember { mutableStateOf(false) }
 
@@ -131,7 +138,8 @@ private fun Content(
                     scope.launch {
                         lazyListState.scrollToItem(0)
                     }
-                }
+                },
+                sendPhoto = { photoLauncher.launch("image/*") }
             )
         },
         containerColor = DanTalkTheme.colors.singleTheme
@@ -147,10 +155,12 @@ private fun Content(
                 },
                 onActionButtonClick = { /*TODO*/ },
                 onDownloadButtonClick = {
-                    onIntent(ChatStore.Intent.DownloadImage(
-                        context = context,
-                        url = state.chat.user.avatar
-                    ))
+                    onIntent(
+                        ChatStore.Intent.DownloadImage(
+                            context = context,
+                            url = state.chat.user.avatar
+                        )
+                    )
                 },
                 user = state.chat.user
             )
