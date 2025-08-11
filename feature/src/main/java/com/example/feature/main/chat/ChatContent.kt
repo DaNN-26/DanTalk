@@ -93,26 +93,26 @@ private fun Content(
 
     val unreadMessageIds by remember(state.messages) {
         derivedStateOf {
-            val visibleItemIndexes = lazyListState.layoutInfo.visibleItemsInfo.map { it.index }
-            if (visibleItemIndexes.isEmpty()) return@derivedStateOf emptyList()
+            val visibleIndexes = lazyListState.layoutInfo.visibleItemsInfo.map { it.index }
+            if (visibleIndexes.isEmpty()) return@derivedStateOf emptyList()
 
-            val visibleUnreadMessages = visibleItemIndexes.mapNotNull { index ->
-                val item = state.messages[index]
-                if (item is MessageListItem.MessageItem && !item.message.isCurrentUserMessage && !item.message.read) item else null
-            }
+            val firstVisibleUnreadIndex = visibleIndexes
+                .mapNotNull { index ->
+                    val item = state.messages[index]
+                    if (item is MessageListItem.MessageItem &&
+                        !item.message.isCurrentUserMessage &&
+                        !item.message.read
+                    ) index else null
+                }
+                .minOrNull()
 
-            if (visibleUnreadMessages.isEmpty()) return@derivedStateOf emptyList()
+            if (firstVisibleUnreadIndex == null) return@derivedStateOf emptyList()
 
-            val lastVisibleUnread = visibleUnreadMessages.first()
-            val lastIndex = state.messages.indexOf(lastVisibleUnread)
-
-            val messagesToMarkAsRead = state.messages
-                .drop(lastIndex)
-                .filterIsInstance<Message>()
-                .filter { it.sender != state.currentUser.id && !it.read }
-                .map { it.id }
-
-            messagesToMarkAsRead + lastVisibleUnread.message.id
+            state.messages
+                .drop(firstVisibleUnreadIndex)
+                .filterIsInstance<MessageListItem.MessageItem>()
+                .filter { !it.message.isCurrentUserMessage && !it.message.read }
+                .map { it.message.id }
         }
     }
 
