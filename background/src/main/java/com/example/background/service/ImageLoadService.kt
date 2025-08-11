@@ -48,7 +48,7 @@ class ImageLoadService : Service() {
                 } else {
                     intent.getParcelableExtra("uri")
                 }
-                if(chatId != null && uri != null)
+                if (chatId != null && uri != null)
                     postMessageImage(chatId, uri)
                 else
                     stopSelf()
@@ -88,23 +88,24 @@ class ImageLoadService : Service() {
 
     private fun postMessageImage(chatId: String, uri: Uri) {
         CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val storageRepo = get<StorageRepository>()
-                val userDataStoreRepo = get<UserDataStoreRepository>()
-                val chatRepo = get<ChatRepository>()
-                val url = storageRepo.postMessageImage(uri)
-                val message = Message(
-                    sender = userDataStoreRepo.getUserData.first().id,
-                    message = url,
-                    isPhoto = true
-                )
-                chatRepo.sendMessage(chatId, message)
-                showCompletionNotification(this@ImageLoadService, "Изображение успешно загружено")
-                stopSelf()
-            } catch (e: Exception) {
-                showCompletionNotification(this@ImageLoadService, "Изображение не загружено")
-                stopSelf()
-            }
+            val storageRepo = get<StorageRepository>()
+            val userDataStoreRepo = get<UserDataStoreRepository>()
+            val chatRepo = get<ChatRepository>()
+            storageRepo.postMessageImage(uri)
+                .onSuccess {
+                    val message = Message(
+                        sender = userDataStoreRepo.getUserData.first().id,
+                        message = it,
+                        isPhoto = true
+                    )
+                    chatRepo.sendMessage(chatId, message)
+                    showCompletionNotification(this@ImageLoadService, "Изображение успешно загружено")
+                    stopSelf()
+                }
+                .onFailure {
+                    showCompletionNotification(this@ImageLoadService, "Изображение не загружено")
+                    stopSelf()
+                }
         }
     }
 
@@ -115,7 +116,10 @@ class ImageLoadService : Service() {
                 val mediaRepo = get<MediaRepository>()
                 val image = storageRepo.downloadAvatarImage(url)
                 mediaRepo.saveImageToGallery(image).let { uri ->
-                    if (uri != null) showCompletionNotification(this@ImageLoadService, "Изображение успешно загружено на устройство")
+                    if (uri != null) showCompletionNotification(
+                        this@ImageLoadService,
+                        "Изображение успешно загружено на устройство"
+                    )
                 }
                 stopSelf()
             } catch (e: Exception) {

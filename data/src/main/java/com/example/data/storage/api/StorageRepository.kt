@@ -5,5 +5,5 @@ import android.net.Uri
 interface StorageRepository {
     suspend fun postAvatarImage(uri: Uri): String
     suspend fun downloadAvatarImage(url: String): ByteArray
-    suspend fun postMessageImage(uri: Uri): String
+    suspend fun postMessageImage(uri: Uri): Result<String>
 }
