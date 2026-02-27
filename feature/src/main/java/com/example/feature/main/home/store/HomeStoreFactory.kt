@@ -6,8 +6,10 @@ import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineBootstrapperScope
 import com.arkivanov.mvikotlin.extensions.coroutines.CoroutineExecutorScope
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineBootstrapper
 import com.arkivanov.mvikotlin.extensions.coroutines.coroutineExecutorFactory
+import com.example.core.design.AppTheme
 import com.example.core.ui.model.UiChat
 import com.example.core.ui.model.UiUserData
+import com.example.data.app_theme.api.AppThemeDataStoreRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.chat.api.model.Chat
 import com.example.data.user.api.model.UserData
@@ -20,13 +22,17 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class HomeStoreFactory(
     private val factory: StoreFactory,
     private val chatRepository: ChatRepository,
+    private val appThemeDataStoreRepository: AppThemeDataStoreRepository,
     private val userDataFlow: Flow<UserData>,
     private val clearUserData: () -> Unit,
 ) {
@@ -57,6 +63,7 @@ class HomeStoreFactory(
                     onIntent<Intent.NavigateToPeople> { publish(Label.NavigateToPeople) }
                     onIntent<Intent.OpenChat> { publish(Label.NavigateToChat(it.id)) }
                     onIntent<Intent.DeleteChat> { launch { deleteChat(it.id) } }
+                    onIntent<Intent.ChangeAppTheme> { launch { changeAppTheme(it.theme) } }
                     onIntent<Intent.SignOut> { signOut() }
                 },
                 reducer = { msg ->
@@ -71,6 +78,7 @@ class HomeStoreFactory(
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun CoroutineBootstrapperScope<Action>.getData() {
         dispatch(Action.UpdateLoading(true))
+        var first = true
         launch {
             userDataFlow
                 .map { it.toUi() }
@@ -78,33 +86,45 @@ class HomeStoreFactory(
                     dispatch(Action.SetUser(user))
                     getChatsFlow(user.id)
                 }
+                .onEach {
+                    if (first) {
+                        first = false
+                        dispatch(Action.UpdateLoading(false))
+                    }
+                }
                 .collect { chats ->
                     dispatch(Action.GetChats(chats))
-                    dispatch(Action.UpdateLoading(false))
                 }
         }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private suspend fun getChatsFlow(userId: String): Flow<List<UiChat>> =
-        withContext(Dispatchers.IO) {
-            chatRepository.getChats(userId).flatMapLatest { chats ->
-                combine(
-                    chats.map { chat ->
-                        chatRepository.getChatMessages(chat.id)
-                            .map { messages ->
-                                Chat(
-                                    id = chat.id,
-                                    users = chat.users
-                                ).toUi(userId, messages.toUi(userId))
-                            }
-                    }
-                ) { it.toList() }
+    private fun getChatsFlow(userId: String): Flow<List<UiChat>> =
+        chatRepository.getChats(userId)
+            .flatMapLatest { chats ->
+                if (chats.isEmpty())
+                    flowOf(emptyList())
+                else
+                    combine(
+                        chats.map { chat ->
+                            chatRepository.getChatMessages(chat.id)
+                                .map { messages ->
+                                    Chat(
+                                        id = chat.id,
+                                        users = chat.users
+                                    ).toUi(userId, messages.toUi(userId))
+                                }
+                        }
+                    ) { it.toList() }
             }
-        }
+            .flowOn(Dispatchers.IO)
 
     private suspend fun deleteChat(id: String) = withContext(Dispatchers.IO) {
         chatRepository.deleteChat(id)
+    }
+
+    private suspend fun changeAppTheme(theme: AppTheme) = withContext(Dispatchers.IO) {
+        appThemeDataStoreRepository.setTheme(theme)
     }
 
     private fun CoroutineExecutorScope<State, Nothing, Nothing, Label>.signOut() {

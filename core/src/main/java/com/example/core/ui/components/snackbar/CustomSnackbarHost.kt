@@ -8,12 +8,14 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.core.design.theme.DanTalkTheme
 
 @Composable
 fun CustomSnackbarHost(
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    containerColor: Color = DanTalkTheme.colors.altSingleTheme
 ) {
     SnackbarHost(
         hostState = snackbarHostState,
@@ -21,7 +23,7 @@ fun CustomSnackbarHost(
         Snackbar(
             modifier = Modifier.padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            containerColor = DanTalkTheme.colors.altSingleTheme,
+            containerColor = containerColor,
             contentColor = DanTalkTheme.colors.oppositeTheme
         ) {
             Text(text = snackbarData.visuals.message)

@@ -1,21 +1,23 @@
 package com.example.feature.main.home.ui.components
 
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.People
@@ -23,30 +25,33 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedIconToggleButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.core.design.AppTheme
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.model.UiUserData
-import com.example.data.user.api.model.UserData
 
 @Composable
 fun HomeNavDrawer(
     drawerState: DrawerState,
+    appTheme: AppTheme,
+    changeTheme: (AppTheme) -> Unit,
     onProfileClick: () -> Unit,
     onPeopleClick: () -> Unit,
     onSettingsClick: () -> Unit,
@@ -58,14 +63,21 @@ fun HomeNavDrawer(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.fillMaxWidth(0.85f),
-                drawerShape = RoundedCornerShape(topEnd = 24.dp),
-                drawerContainerColor = DanTalkTheme.colors.singleTheme
+            Column(
+                modifier = Modifier
+                    .padding(end = 60.dp)
+                    .background(DanTalkTheme.colors.extras)
+                    .fillMaxHeight()
             ) {
-                NavDrawerHeader(user)
+                NavDrawerHeader(
+                    user = user,
+                    appTheme = appTheme,
+                    onChangeTheme = { changeTheme(it) }
+                )
                 Column(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .navigationBarsPadding(),
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
@@ -106,48 +118,66 @@ fun HomeNavDrawer(
 
 @Composable
 private fun NavDrawerHeader(
-    user: UiUserData
+    user: UiUserData,
+    appTheme: AppTheme,
+    onChangeTheme: (AppTheme) -> Unit,
 ) {
-    val gradient = if(!isSystemInDarkTheme())
-        Brush.linearGradient(
-            listOf(
-                Color(0, 183, 225),
-                Color(41, 214, 212)
-            )
-        )
-    else
-        Brush.linearGradient(
-            listOf(
-                Color(10, 21, 37, 255),
-                Color(4, 31, 61, 255)
-            )
-        )
-
+    val isSystemInDarkTheme = appTheme == AppTheme.DARK || appTheme == AppTheme.SYSTEM && isSystemInDarkTheme()
     Column(
         modifier = Modifier
+            .background(
+                if (isSystemInDarkTheme)
+                    Color(21, 21, 21, 255)
+                else
+                    DanTalkTheme.colors.main
+            )
+            .statusBarsPadding()
             .fillMaxWidth()
-            .background(gradient)
             .padding(horizontal = 16.dp)
             .padding(top = 12.dp)
     ) {
-        AsyncImage(
-            model = user.avatar,
-            contentDescription = null,
-            modifier = Modifier
-                .size(70.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            AsyncImage(
+                model = user.avatar,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(70.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+            IconButton(
+                onClick = {
+                    when (appTheme) {
+                        AppTheme.DARK -> onChangeTheme(AppTheme.LIGHT)
+                        AppTheme.LIGHT -> onChangeTheme(AppTheme.DARK)
+                        AppTheme.SYSTEM -> if (isSystemInDarkTheme)
+                            onChangeTheme(AppTheme.LIGHT) else onChangeTheme(AppTheme.DARK)
+                    }
+                },
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = Color.White
+                )
+            ) {
+                Icon(
+                    imageVector = if (isSystemInDarkTheme) Icons.Filled.LightMode else Icons.Default.DarkMode,
+                    contentDescription = null
+                )
+            }
+        }
         Spacer(Modifier.height(8.dp))
         Text(
             text = user.firstname,
             fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             color = Color.White
         )
         Text(
-            text = user.email,
-            color = Color.White
+            text = user.username,
+            fontWeight = FontWeight.Medium,
+            color = if(isSystemInDarkTheme) DanTalkTheme.colors.hint else Color.White
         )
         Spacer(Modifier.height(12.dp))
     }

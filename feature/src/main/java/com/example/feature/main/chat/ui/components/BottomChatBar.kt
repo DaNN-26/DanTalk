@@ -1,6 +1,9 @@
 package com.example.feature.main.chat.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
@@ -38,13 +43,13 @@ fun BottomChatBar(
         onValueChange = { onMessageChange(it) },
         modifier = Modifier
             .fillMaxWidth()
-            .background(DanTalkTheme.colors.altSingleTheme)
-            .padding(horizontal = 12.dp, vertical = 4.dp)
             .navigationBarsPadding()
+            .background(DanTalkTheme.colors.singleTheme)
+            .padding(horizontal = 12.dp, vertical = 4.dp)
             .imePadding(),
         textStyle = LocalTextStyle.current.copy(
             color = DanTalkTheme.colors.oppositeTheme,
-            fontSize = 18.sp
+            fontSize = 16.sp
         ),
         maxLines = 4,
         cursorBrush = SolidColor(DanTalkTheme.colors.main),
@@ -61,22 +66,28 @@ fun BottomChatBar(
                     if (message.isEmpty())
                         Text(
                             text = "Сообщение",
-                            fontSize = 18.sp,
-                            color = DanTalkTheme.colors.subText
+                            fontSize = 16.sp,
+                            color = DanTalkTheme.colors.hint
                         )
                     innerTextField()
                 }
                 Row {
-                    IconButton(
-                        onClick = sendPhoto,
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = DanTalkTheme.colors.oppositeTheme
-                        )
+                    AnimatedVisibility(
+                        visible = message.isBlank(),
+                        enter = fadeIn(tween(400)),
+                        exit = fadeOut(tween(160))
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null
-                        )
+                        IconButton(
+                            onClick = sendPhoto,
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = DanTalkTheme.colors.hint
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                            )
+                        }
                     }
                     AnimatedVisibility(
                         visible = message.isNotBlank(),
@@ -84,12 +95,13 @@ fun BottomChatBar(
                         IconButton(
                             onClick = sendMessage,
                             colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = DanTalkTheme.colors.oppositeTheme
+                                contentColor = DanTalkTheme.colors.main
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Send,
-                                contentDescription = null
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }

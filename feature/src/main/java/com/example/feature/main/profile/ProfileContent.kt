@@ -2,8 +2,6 @@ package com.example.feature.main.profile
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -52,7 +50,6 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,12 +57,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.network_observer.ConnectionState
+import com.example.core.network_observer.connectionState
+import com.example.core.ui.components.NoInternetConnection
 import com.example.core.ui.components.snackbar.CustomSnackbarHost
 import com.example.core.ui.components.topbar.ExtraTopBar
 import com.example.core.ui.model.UiUserData
 import com.example.core.ui.util.InputFormField
 import com.example.dantalk.features.main.profile.component.ProfileComponent
-import com.example.feature.R
 import com.example.feature.main.profile.store.ProfileStore
 import com.example.feature.main.profile.ui.components.ProfileBottomSheet
 import com.example.feature.main.profile.util.ProfileValidation
@@ -90,6 +89,8 @@ private fun Content(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    val connectionState by connectionState()
 
     val sheetState = rememberModalBottomSheetState(true)
     var sheetIsVisible by remember { mutableStateOf(false) }
@@ -154,7 +155,7 @@ private fun Content(
         )
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(state.validation) {
         if (state.validation != ProfileValidation.Valid) {
             snackbarHostState.showSnackbar(
                 message = when (state.validation) {
@@ -170,46 +171,54 @@ private fun Content(
         }
     }
 
-    val photoLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) onIntent(ProfileStore.Intent.LoadImageIntoStorage(context, uri))
-    }
+    val photoLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            if (uri != null) onIntent(ProfileStore.Intent.LoadImageIntoStorage(context, uri))
+        }
 
     Scaffold(
         topBar = {
-            ExtraTopBar(
-                actionsIcon = Icons.Default.Image,
-                actions = { photoLauncher.launch("image/*") },
-                navigateBack = { onIntent(ProfileStore.Intent.NavigateBack) },
-                color = Color.White
-            )
-        },
-        snackbarHost = {
-            CustomSnackbarHost(snackbarHostState)
+            Column {
+                ExtraTopBar(
+                    actionsIcon = Icons.Default.Image,
+                    actions = { photoLauncher.launch("image/*") },
+                    navigateBack = { onIntent(ProfileStore.Intent.NavigateBack) },
+                    color = Color.White
+                )
+                CustomSnackbarHost(snackbarHostState)
+            }
         },
         floatingActionButton = {
             ProfileEditFloatingButton { sheetIsVisible = true }
         },
         containerColor = DanTalkTheme.colors.singleTheme
-    ) {
-        @Suppress("UNUSED_EXPRESSION") it
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
-        ) {
-            ProfileAvatar(state.currentUser ?: UiUserData())
-            ProfileInformation(
-                email = state.currentUser?.email ?: "",
-                username = state.currentUser?.username ?: "",
-            )
-            if (sheetIsVisible)
-                ProfileBottomSheet(
-                    sheetState = sheetState,
-                    onDismissRequest = { sheetIsVisible = false },
-                    onClick = {
-                        onIntent(ProfileStore.Intent.SaveNewUserData)
-                        sheetIsVisible = false
-                    },
-                    profileFormFields = fields
+    ) { contentPadding ->
+        Box {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(18.dp)
+            ) {
+                ProfileAvatar(state.currentUser ?: UiUserData())
+                ProfileInformation(
+                    email = state.currentUser?.email ?: "",
+                    username = state.currentUser?.username ?: "",
+                )
+                if (sheetIsVisible)
+                    ProfileBottomSheet(
+                        sheetState = sheetState,
+                        onDismissRequest = { sheetIsVisible = false },
+                        onClick = {
+                            onIntent(ProfileStore.Intent.SaveNewUserData)
+                            sheetIsVisible = false
+                        },
+                        profileFormFields = fields,
+                    )
+            }
+            if (connectionState is ConnectionState.Unavailable)
+                NoInternetConnection(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(contentPadding)
                 )
         }
     }
@@ -217,7 +226,7 @@ private fun Content(
 
 @Composable
 private fun ProfileAvatar(
-    user: UiUserData
+    user: UiUserData,
 ) {
     val name = if ((user.lastname.isBlank() && user.patronymic.isBlank()))
         user.firstname
@@ -252,7 +261,7 @@ private fun ProfileAvatar(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .padding(20.dp),
-            fontSize = 32.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.White,
             style = LocalTextStyle.current.copy(
@@ -309,26 +318,26 @@ private fun InformationItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = DanTalkTheme.colors.oppositeTheme
+            tint = DanTalkTheme.colors.hint
         )
         VerticalDivider(
             modifier = Modifier
                 .wrapContentHeight()
                 .clip(RoundedCornerShape(16.dp)),
-            thickness = 2.dp,
-            color = DanTalkTheme.colors.oppositeTheme
+            thickness = 1.25f.dp,
+            color = DanTalkTheme.colors.hint
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             Text(
                 text = text,
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 color = DanTalkTheme.colors.oppositeTheme
             )
             Text(
                 text = title,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
                 color = DanTalkTheme.colors.hint
             )
         }
@@ -341,7 +350,7 @@ private fun ProfileEditFloatingButton(
 ) {
     FloatingActionButton(
         onClick = onClick,
-        modifier = Modifier.size(65.dp),
+        modifier = Modifier.size(56.dp),
         shape = CircleShape,
         containerColor = DanTalkTheme.colors.main,
         contentColor = Color.White
@@ -349,7 +358,7 @@ private fun ProfileEditFloatingButton(
         Icon(
             imageVector = Icons.Filled.Edit,
             contentDescription = null,
-            modifier = Modifier.size(30.dp)
+            modifier = Modifier.size(24.dp)
         )
     }
 }

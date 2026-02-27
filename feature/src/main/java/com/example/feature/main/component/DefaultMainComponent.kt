@@ -7,6 +7,8 @@ import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.example.core.design.AppTheme
+import com.example.data.app_theme.api.AppThemeDataStoreRepository
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.media.api.MediaRepository
@@ -19,6 +21,7 @@ import com.example.feature.main.home.component.DefaultHomeComponent
 import com.example.feature.main.people.component.DefaultPeopleComponent
 import com.example.feature.main.profile.component.DefaultProfileComponent
 import com.example.feature.main.search.component.DefaultSearchComponent
+import com.example.feature.main.settings.component.DefaultSettingsComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,8 +35,8 @@ class DefaultMainComponent(
     private val userRepository: UserRepository,
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
+    private val appThemeDataStoreRepository: AppThemeDataStoreRepository,
     private val storageRepository: StorageRepository,
-    private val mediaRepository: MediaRepository,
     private val clearUserData: () -> Unit,
     private val navigateToAuth: () -> Unit,
 ) : ComponentContext by componentContext, MainComponent {
@@ -65,6 +68,7 @@ class DefaultMainComponent(
                     config = config
                 )
             )
+            is Config.Settings -> MainComponent.Child.Settings(settingsComponent(componentContext))
         }
 
     private fun homeComponent(componentContext: ComponentContext) =
@@ -72,6 +76,7 @@ class DefaultMainComponent(
             componentContext = componentContext,
             storeFactory = storeFactory,
             chatRepository = chatRepository,
+            appThemeDataStoreRepository = appThemeDataStoreRepository,
             userDataFlow = userDataFlow,
             clearUserData = clearUserData,
             navigateToSearch = { navigation.push(Config.Search) },
@@ -126,6 +131,13 @@ class DefaultMainComponent(
             navigateBack = { navigation.pop() }
         )
 
+    private fun settingsComponent(
+        componentContext: ComponentContext
+    ) =
+        DefaultSettingsComponent(
+            componentContext = componentContext
+        )
+
     @Serializable
     sealed interface Config {
         @Serializable
@@ -142,5 +154,8 @@ class DefaultMainComponent(
 
         @Serializable
         class Chat(val id: String) : Config
+
+        @Serializable
+        data object Settings : Config
     }
 }

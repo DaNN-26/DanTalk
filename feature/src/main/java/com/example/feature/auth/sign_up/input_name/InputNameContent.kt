@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.snackbar.CustomSnackbarHost
 import com.example.core.ui.components.topbar.ExtraTopBar
 import com.example.core.ui.util.InputFormField
@@ -81,7 +82,7 @@ private fun Content(
                 navigateBack = { onIntent(InputNameStore.Intent.NavigateBack) }
             )
         },
-        snackbarHost = { CustomSnackbarHost(snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState, DanTalkTheme.colors.singleTheme) },
         fields = fields,
         onMainButtonClick = { onIntent(InputNameStore.Intent.NavigateNext) },
         title = Pair("Регистрация", "Введите данные о себе"),

@@ -1,6 +1,7 @@
 package com.example.feature.main.home.store
 
 import com.arkivanov.mvikotlin.core.store.Store
+import com.example.core.design.AppTheme
 import com.example.core.ui.model.UiChat
 import com.example.core.ui.model.UiUserData
 import com.example.feature.main.home.store.HomeStore.Intent
@@ -15,6 +16,7 @@ interface HomeStore : Store<Intent, State, Label> {
         data object NavigateToPeople : Intent
         class OpenChat(val id: String) : Intent
         class DeleteChat(val id: String) : Intent
+        class ChangeAppTheme(val theme: AppTheme) : Intent
         data object SignOut : Intent
     }
 

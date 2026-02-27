@@ -6,6 +6,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -13,11 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.core.ui.components.MainTextField
 import com.example.core.design.theme.DanTalkTheme
 
@@ -41,7 +46,16 @@ fun SearchTopBar(
                 value = query,
                 onValueChange = { onQueryChange(it) },
                 modifier = Modifier.focusRequester(focusRequester),
-                placeholder = "Поиск",
+                textStyle = LocalTextStyle.current.copy(
+                    color = DanTalkTheme.colors.oppositeTheme,
+                    fontSize = 18.sp
+                ),
+                placeholder = {
+                    Text(
+                        text = "Поиск",
+                        fontSize = 18.sp
+                    )
+                },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -52,6 +66,7 @@ fun SearchTopBar(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
             )
         },
+        modifier = Modifier.shadow(1.dp),
         navigationIcon = {
             IconButton(
                 onClick = {
@@ -67,7 +82,7 @@ fun SearchTopBar(
             }
         },
      colors = TopAppBarDefaults.topAppBarColors(
-         containerColor = DanTalkTheme.colors.singleTheme,
+         containerColor = DanTalkTheme.colors.extras,
          navigationIconContentColor = DanTalkTheme.colors.hint
      )
     )

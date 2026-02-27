@@ -23,15 +23,10 @@ import com.example.core.design.theme.DanTalkTheme
 fun HomeTopBar(
     onMenuClick: () -> Unit,
     onSearchClick: () -> Unit,
-    isScrollInInitialState: () -> Boolean,
 ) {
-    val elevation = if (isScrollInInitialState.invoke()) 0.dp else 4.dp
-    val topBarColor = if (isScrollInInitialState.invoke())
-        DanTalkTheme.colors.singleTheme else DanTalkTheme.colors.topBar
-
     TopAppBar(
         title = {},
-        modifier = Modifier.shadow(elevation),
+        modifier = Modifier.shadow(1.dp),
         navigationIcon = {
             IconButton(
                 onClick = onMenuClick
@@ -53,7 +48,7 @@ fun HomeTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = topBarColor,
+            containerColor = DanTalkTheme.colors.extras,
             actionIconContentColor = DanTalkTheme.colors.oppositeTheme,
             navigationIconContentColor = DanTalkTheme.colors.oppositeTheme
         ),

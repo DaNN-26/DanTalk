@@ -6,17 +6,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.arkivanov.decompose.defaultComponentContext
 import com.arkivanov.mvikotlin.main.store.DefaultStoreFactory
-import com.example.core.design.theme.DanTalkTheme
+import com.example.data.app_theme.api.AppThemeDataStoreRepository
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.media.api.MediaRepository
 import com.example.data.storage.api.StorageRepository
 import com.example.data.user.api.UserDataStoreRepository
 import com.example.data.user.api.UserRepository
-import com.example.feature.main.chat.ChatContent
-import com.example.feature.main.chat.component.ChatComponent
-import com.example.feature.main.chat.component.DefaultChatComponent
-import com.example.feature.main.chat.store.ChatStoreFactory
 import com.example.feature.root.RootContent
 import com.example.feature.root.component.DefaultRootComponent
 import org.koin.android.ext.android.getKoin
@@ -33,14 +29,12 @@ class MainActivity : ComponentActivity() {
             chatRepository = getKoin().get<ChatRepository>(),
             userDataStoreRepository = getKoin().get<UserDataStoreRepository>(),
             storageRepository = getKoin().get<StorageRepository>(),
-            mediaRepository = getKoin().get<MediaRepository>()
+            appThemeDataStoreRepository = getKoin().get<AppThemeDataStoreRepository>()
         )
         enableEdgeToEdge()
         setContent {
-            DanTalkTheme {
-                KoinAndroidContext {
-                    RootContent(rootComponent)
-                }
+            KoinAndroidContext {
+                RootContent(rootComponent)
             }
         }
     }

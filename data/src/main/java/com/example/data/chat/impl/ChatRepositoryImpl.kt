@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -28,7 +29,7 @@ internal class ChatRepositoryImpl(
             .whereArrayContains("users", userRef)
             .addSnapshotListener { snapshot, e ->
                 if (e != null) {
-                    Log.d("Firestore", "Failed to get chats $e")
+                    close(e)
                     return@addSnapshotListener
                 }
                 if (snapshot == null) return@addSnapshotListener
@@ -46,7 +47,7 @@ internal class ChatRepositoryImpl(
                 }
             }
         awaitClose { listener.remove() }
-    }
+    }.distinctUntilChanged()
 
     override suspend fun createChat(userIds: List<String>): String {
         val chatId = userIds.sorted().joinToString("")

@@ -1,4 +1,4 @@
-package com.example.core.network_monitor
+package com.example.core.network_observer
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -6,17 +6,17 @@ import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.flowOn
 
-class NetworkMonitor(context: Context) {
+fun Context.observeConnectivityAsFlow() =
+    callbackFlow {
+        val connectivityManager =
+            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    private val connectivityManager =
-        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    val networkStatus = callbackFlow<Boolean> {
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
@@ -38,9 +38,10 @@ class NetworkMonitor(context: Context) {
 
             override fun onCapabilitiesChanged(
                 network: Network,
-                networkCapabilities: NetworkCapabilities
+                networkCapabilities: NetworkCapabilities,
             ) {
-                val hasInternet = networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                val hasInternet =
+                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
                 trySend(hasInternet)
             }
         }
@@ -50,12 +51,5 @@ class NetworkMonitor(context: Context) {
             connectivityManager.unregisterNetworkCallback(callback)
         }
     }
-        .onStart { emit(isCurrentlyConnected()) }
         .distinctUntilChanged()
-
-    private fun isCurrentlyConnected(): Boolean {
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-}
+        .flowOn(Dispatchers.IO)

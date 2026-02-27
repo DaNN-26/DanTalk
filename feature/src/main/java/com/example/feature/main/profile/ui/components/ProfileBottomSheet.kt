@@ -1,5 +1,6 @@
 package com.example.feature.main.profile.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,17 +11,21 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.ui.components.MainButton
 import com.example.core.ui.components.MainTextField
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.ui.components.snackbar.CustomSnackbarHost
 import com.example.core.ui.util.InputFormField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,19 +52,25 @@ fun ProfileBottomSheet(
         ) {
             Text(
                 text = "Редактирование профиля",
-                fontSize = 18.sp
+                fontSize = 16.sp,
+                color = DanTalkTheme.colors.hint,
+                fontWeight = FontWeight.W500
             )
             profileFormFields.forEach { field ->
                 MainTextField(
                     value = field.value,
                     onValueChange = { field.onValueChange(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = field.title,
+                    placeholder = {
+                        Text(
+                            text = field.title,
+                            fontSize = 14.sp
+                        )
+                    },
                     isError = field.isError,
                     keyboardOptions = field.keyboardOptions
                 )
             }
-            Spacer(modifier = Modifier.height(30.dp))
             MainButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),

@@ -83,7 +83,7 @@ fun Message(message: UiMessage) {
                             start = if (message.isCurrentUserMessage) 0.dp else 6.dp
                         )
                         .background(
-                            color = if (message.isCurrentUserMessage) DanTalkTheme.colors.main else DanTalkTheme.colors.altSingleTheme,
+                            color = if (message.isCurrentUserMessage) DanTalkTheme.colors.main else DanTalkTheme.colors.singleTheme,
                             shape = messageShape
                         )
                         .padding(10.dp)
@@ -134,12 +134,7 @@ fun MessagesDate(
     modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .background(
-                color = DanTalkTheme.colors.altSingleTheme,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(horizontal = 6.dp, vertical = 2.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -157,7 +152,7 @@ private fun MessageTail(
     isCurrentUserMessage: Boolean = false,
 ) {
     val tailColor =
-        if (isCurrentUserMessage) DanTalkTheme.colors.main else DanTalkTheme.colors.altSingleTheme
+        if (isCurrentUserMessage) DanTalkTheme.colors.main else DanTalkTheme.colors.singleTheme
 
     Canvas(
         modifier = Modifier

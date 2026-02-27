@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.core.design.theme.DanTalkTheme
 import com.valentinilk.shimmer.shimmer
 
@@ -37,13 +38,13 @@ fun ItemShimmer() {
             Box(
                 modifier = Modifier
                     .shimmer()
-                    .size(65.dp)
+                    .size(60.dp)
                     .clip(CircleShape)
                     .background(DanTalkTheme.colors.hint.copy(alpha = 0.4f))
             )
             Column(
                 modifier = Modifier
-                    .height(65.dp)
+                    .height(60.dp)
                     .shimmer(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -51,13 +52,15 @@ fun ItemShimmer() {
                     text = "",
                     modifier = Modifier
                         .width(120.dp)
-                        .background(DanTalkTheme.colors.hint.copy(alpha = 0.4f))
+                        .background(DanTalkTheme.colors.hint.copy(alpha = 0.4f)),
+                    fontSize = 16.sp
                 )
                 Text(
                     text = "",
                     modifier = Modifier
                         .width(80.dp)
-                        .background(DanTalkTheme.colors.hint.copy(alpha = 0.4f))
+                        .background(DanTalkTheme.colors.hint.copy(alpha = 0.4f)),
+                    fontSize = 14.sp
                 )
             }
         }
@@ -65,7 +68,7 @@ fun ItemShimmer() {
             modifier = Modifier
                 .padding(horizontal = 10.dp)
                 .shimmer(),
-            color = DanTalkTheme.colors.hint.copy(alpha = 0.3f)
+            color = DanTalkTheme.colors.spacer
         )
     }
 }

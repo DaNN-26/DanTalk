@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.components.snackbar.CustomSnackbarHost
 import com.example.core.ui.util.InputFormField
 import com.example.feature.auth.sign_up.input_email.component.InputEmailComponent
@@ -82,7 +83,7 @@ private fun Content(
     }
 
     AuthForm(
-        snackbarHost = { CustomSnackbarHost(snackbarHostState) },
+        snackbarHost = { CustomSnackbarHost(snackbarHostState, DanTalkTheme.colors.singleTheme) },
         fields = fields,
         onMainButtonClick = { onIntent(InputEmailStore.Intent.NavigateNext) },
         onBottomTextButtonClick = { onIntent(InputEmailStore.Intent.NavigateBack) },

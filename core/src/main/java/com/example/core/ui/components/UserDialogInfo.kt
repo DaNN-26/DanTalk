@@ -51,14 +51,13 @@ fun UserDialogInfo(
     onDownloadButtonClick: () -> Unit,
     user: UiUserData,
 ) {
-    val context = LocalContext.current
-
     Dialog(
         onDismissRequest = onDismissRequest
     ) {
         Column(
             modifier = Modifier
-                .background(DanTalkTheme.colors.altSingleTheme, RoundedCornerShape(16.dp))
+                .padding(12.dp)
+                .background(DanTalkTheme.colors.singleTheme, RoundedCornerShape(16.dp))
                 .padding(horizontal = 10.dp)
                 .padding(bottom = 16.dp)
                 .verticalScroll(rememberScrollState()),
@@ -88,7 +87,7 @@ fun UserDialogInfo(
                     onClick = { onDownloadButtonClick() },
                     modifier = Modifier.align(Alignment.TopEnd),
                     colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = DanTalkTheme.colors.oppositeTheme
+                        contentColor = Color.White
                     ),
                     icon = Icons.Default.Download
                 )
@@ -139,14 +138,14 @@ private fun DialogUserInfoItem(
             ) {
                 Text(
                     text = info,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = DanTalkTheme.colors.oppositeTheme
                 )
                 Text(
                     text = title,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     color = DanTalkTheme.colors.hint
                 )
             }
@@ -168,7 +167,7 @@ private fun DialogUserInfoItem(
             }
         }
         HorizontalDivider(
-            color = DanTalkTheme.colors.hint.copy(alpha = 0.3f)
+            color = DanTalkTheme.colors.spacer
         )
     }
 }

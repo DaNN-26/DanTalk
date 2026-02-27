@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 
 internal class UserDataStoreRepositoryImpl(private val context: Context) : UserDataStoreRepository {
     companion object {
-        private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("user_data")
+        private val Context.dataStore by preferencesDataStore("user_data")
 
         private val USER_ID = stringPreferencesKey("user_id")
         private val USER_AVATAR = stringPreferencesKey("user_avatar")

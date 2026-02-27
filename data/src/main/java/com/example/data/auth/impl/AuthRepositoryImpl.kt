@@ -8,7 +8,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthEmailException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException
-import kotlin.Result.Companion.success
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
@@ -30,6 +29,7 @@ internal class AuthRepositoryImpl(
                             is FirebaseNetworkException -> SignUpException.NetworkException()
                             else -> it
                         }
+
                     )
                 }
         }

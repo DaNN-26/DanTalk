@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -35,8 +36,11 @@ fun MainTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current.copy(
+        color = DanTalkTheme.colors.oppositeTheme,
+    ),
     trailingIcon: @Composable (() -> Unit)? = null,
-    placeholder: String,
+    placeholder: @Composable (() -> Unit) = {},
     isError: Boolean = false,
     colors: TextFieldColors = TextFieldDefaults.colors(
         focusedContainerColor = DanTalkTheme.colors.altSingleTheme,
@@ -65,15 +69,8 @@ fun MainTextField(
             )
         else modifier,
         colors = colors,
-        textStyle = LocalTextStyle.current.copy(
-            color = DanTalkTheme.colors.oppositeTheme
-        ),
-        placeholder = {
-            Text(
-                text = placeholder,
-                fontSize = 14.sp
-            )
-        },
+        textStyle = textStyle,
+        placeholder = placeholder,
         shape = RoundedCornerShape(18.dp),
         keyboardOptions = keyboardOptions,
         trailingIcon = trailingIcon,

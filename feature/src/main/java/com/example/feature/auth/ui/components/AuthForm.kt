@@ -49,7 +49,7 @@ fun AuthForm(
     Scaffold(
         topBar = topBar ?: {},
         snackbarHost = snackbarHost,
-        containerColor = DanTalkTheme.colors.singleTheme
+        containerColor = DanTalkTheme.colors.altSingleTheme
     ) { contentPadding ->
         Column(
             modifier = Modifier
@@ -100,14 +100,14 @@ private fun Title(
     ) {
         Text(
             text = title.first,
-            fontSize = 32.sp,
+            fontSize = 28.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
             color = DanTalkTheme.colors.oppositeTheme
         )
         Text(
             text = title.second,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             textAlign = TextAlign.Center,
             color = DanTalkTheme.colors.hint
         )

@@ -5,6 +5,8 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.mvikotlin.core.store.StoreFactory
+import com.example.core.design.AppTheme
+import com.example.data.app_theme.api.AppThemeDataStoreRepository
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.media.api.MediaRepository
@@ -15,7 +17,10 @@ import com.example.feature.auth.component.DefaultAuthComponent
 import com.example.feature.main.component.DefaultMainComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
@@ -28,11 +33,17 @@ class DefaultRootComponent(
     private val chatRepository: ChatRepository,
     private val userDataStoreRepository: UserDataStoreRepository,
     private val storageRepository: StorageRepository,
-    private val mediaRepository: MediaRepository,
+    private val appThemeDataStoreRepository: AppThemeDataStoreRepository
 ) : ComponentContext by componentContext, RootComponent {
 
     private val navigation = StackNavigation<Config>()
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    override val themeState: StateFlow<AppTheme> = appThemeDataStoreRepository.themeFlow.stateIn(
+        scope = scope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = AppTheme.SYSTEM
+    )
 
     private suspend fun getInitialConfiguration(): Config {
         val user = userDataStoreRepository.getUserData.first()
@@ -80,8 +91,8 @@ class DefaultRootComponent(
             userRepository = userRepository,
             chatRepository = chatRepository,
             userDataStoreRepository = userDataStoreRepository,
+            appThemeDataStoreRepository = appThemeDataStoreRepository,
             storageRepository = storageRepository,
-            mediaRepository = mediaRepository,
             clearUserData = ::clearUserData,
             navigateToAuth = { navigation.replaceAll(Config.Auth) }
         )

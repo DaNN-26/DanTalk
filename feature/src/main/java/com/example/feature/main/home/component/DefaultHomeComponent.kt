@@ -5,6 +5,8 @@ import com.arkivanov.mvikotlin.core.instancekeeper.getStore
 import com.arkivanov.mvikotlin.core.store.StoreFactory
 import com.arkivanov.mvikotlin.extensions.coroutines.labels
 import com.arkivanov.mvikotlin.extensions.coroutines.stateFlow
+import com.example.core.design.AppTheme
+import com.example.data.app_theme.api.AppThemeDataStoreRepository
 import com.example.data.auth.api.AuthRepository
 import com.example.data.chat.api.ChatRepository
 import com.example.data.user.api.UserDataStoreRepository
@@ -22,6 +24,7 @@ class DefaultHomeComponent(
     componentContext: ComponentContext,
     private val storeFactory: StoreFactory,
     private val chatRepository: ChatRepository,
+    private val appThemeDataStoreRepository: AppThemeDataStoreRepository,
     private val userDataFlow: Flow<UserData>,
     private val clearUserData: () -> Unit,
     private val navigateToSearch: () -> Unit,
@@ -35,6 +38,7 @@ class DefaultHomeComponent(
         HomeStoreFactory(
             factory = storeFactory,
             chatRepository = chatRepository,
+            appThemeDataStoreRepository = appThemeDataStoreRepository,
             userDataFlow = userDataFlow,
             clearUserData = clearUserData
         ).create()

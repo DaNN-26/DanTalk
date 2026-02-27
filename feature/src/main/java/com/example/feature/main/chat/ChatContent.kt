@@ -2,6 +2,7 @@ package com.example.feature.main.chat
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -142,7 +145,7 @@ private fun Content(
                 sendPhoto = { photoLauncher.launch("image/*") }
             )
         },
-        containerColor = DanTalkTheme.colors.singleTheme
+        containerColor = DanTalkTheme.colors.altSingleTheme
     ) { contentPadding ->
         if (isDialogVisible && state.chat != null)
             UserDialogInfo(
@@ -150,7 +153,7 @@ private fun Content(
                 actionButtonContent = {
                     Text(
                         text = "Посмотреть вложения",
-                        fontSize = 16.sp
+                        fontSize = 14.sp
                     )
                 },
                 onActionButtonClick = { /*TODO*/ },
@@ -190,7 +193,13 @@ private fun Content(
                 if (isDateVisible && firstVisibleDate.isNotEmpty())
                     MessagesDate(
                         date = firstVisibleDate,
-                        modifier = Modifier.padding(top = 8.dp)
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .background(
+                                color = DanTalkTheme.colors.singleTheme.copy(alpha = 0.9f),
+                                shape = RoundedCornerShape(16.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
                     )
             } else ChatShimmerContent()
         }

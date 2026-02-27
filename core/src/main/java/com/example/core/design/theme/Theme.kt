@@ -1,32 +1,37 @@
 package com.example.core.design.theme
 
+import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 val lightColorPalette = ColorPalette(
     main = MainColor,
     hint = HintColor,
-    subText = SubTextColor,
     singleTheme = Color.White,
-    altSingleTheme = LightAltSingleTheme,
+    altSingleTheme = LightAltSingleColor,
     oppositeTheme = Color.Black,
     red = RedColor,
-    topBar = Color.White,
+    extras = LightTopBarColor,
+    spacer = HintColor.copy(alpha = 0.1f)
 )
 
 val darkColorPalette = ColorPalette(
     main = AltMainColor,
     hint = AltHintColor,
-    subText = SubTextColor,
-    singleTheme = Color.Black,
-    altSingleTheme = DarkAltSingleTheme,
+    singleTheme = DarkSingleColor,
+    altSingleTheme = DarkAltSingleColor,
     oppositeTheme = Color.White,
     red = RedColor,
-    topBar = DarkAltSingleTheme
+    extras = DarkTopBarColor,
+    spacer = Color.Black.copy(alpha = 0.5f)
 )
 
 @Composable
@@ -36,6 +41,14 @@ fun DanTalkTheme(
 ) {
     val colors = if(darkTheme) darkColorPalette
     else lightColorPalette
+
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+        }
+    }
 
     CompositionLocalProvider(
         LocalColors provides colors,

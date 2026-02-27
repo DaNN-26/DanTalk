@@ -13,14 +13,15 @@ import com.example.feature.main.search.store.SearchStore.Label
 import com.example.feature.main.search.store.SearchStore.State
 import com.example.feature.mapper.toUi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class SearchStoreFactory(
@@ -54,35 +55,54 @@ class SearchStoreFactory(
                 }
             ) {}
 
+    private var searchJob: Job? = null
+
     private fun CoroutineExecutorScope<State, Msg, Nothing, Nothing>.onQueryChange(query: String) {
         dispatch(Msg.OnQueryChange(query))
-        launch {
+        searchJob?.cancel()
+        var first = true
+
+        searchJob = launch {
             val formattedQuery = query.trim()
+
             if (formattedQuery.isEmpty()) {
                 dispatch(Msg.UpdateChats(emptyList()))
+                dispatch(Msg.UpdateLoading(false))
                 return@launch
             }
-            if (!state().isLoading)
-                dispatch(Msg.UpdateLoading(true))
-            getChatsByQuery(formattedQuery).collect { chats ->
-                dispatch(Msg.UpdateChats(chats))
-                dispatch(Msg.UpdateLoading(false))
-            }
+
+            dispatch(Msg.UpdateChats(emptyList()))
+            dispatch(Msg.UpdateLoading(true))
+
+            getChatsByQuery(formattedQuery)
+                .onEach {
+                    if (first) {
+                        first = false
+                        dispatch(Msg.UpdateLoading(false))
+                    }
+                }
+                .collect { chats ->
+                    dispatch(Msg.UpdateChats(chats))
+                }
         }
     }
 
     private fun getChatsByQuery(query: String): Flow<List<UiChat>> = flow {
-        val currentUserId = userDataFlow.first().id
-        val users = userRepository.getUsersByQuery(query).toUi()
+        try {
+            val currentUserId = userDataFlow.first().id
+            val users = userRepository.getUsersByQuery(query).toUi()
+            if (users.isEmpty()) emit(emptyList())
 
-        val chatFlows = users.map { user ->
-            if (user.id == currentUserId) return@map emptyFlow()
-            val chat = chatRepository.getChatByUserIds(listOf(currentUserId, user.id))
-            chatRepository.getChatMessages(chat.id).map { messages ->
-                chat.toUi(currentUserId, messages.toUi(currentUserId))
+            val chatFlows = users.map { user ->
+                val chat = chatRepository.getChatByUserIds(listOf(currentUserId, user.id))
+                chatRepository.getChatMessages(chat.id).map { messages ->
+                    chat.toUi(currentUserId, messages.toUi(currentUserId))
+                }
             }
-        }
 
-        emitAll(combine(chatFlows) { it.toList() })
+            emitAll(combine(chatFlows) { it.toList() })
+        } catch (e: Exception) {
+            emit(emptyList())
+        }
     }.flowOn(Dispatchers.IO)
 }

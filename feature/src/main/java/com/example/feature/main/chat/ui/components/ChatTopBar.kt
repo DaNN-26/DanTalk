@@ -35,7 +35,7 @@ fun ChatTopBar(
             if (user != null)
                 Text(
                     text = user.username,
-                    fontSize = 20.sp
+                    fontSize = 18.sp
                 )
             else
                 Box(
@@ -69,7 +69,7 @@ fun ChatTopBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = DanTalkTheme.colors.altSingleTheme,
+            containerColor = DanTalkTheme.colors.singleTheme,
             titleContentColor = DanTalkTheme.colors.oppositeTheme,
             navigationIconContentColor = DanTalkTheme.colors.oppositeTheme
         )

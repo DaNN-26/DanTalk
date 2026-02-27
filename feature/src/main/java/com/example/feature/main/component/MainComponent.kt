@@ -7,6 +7,7 @@ import com.example.feature.main.home.component.HomeComponent
 import com.example.feature.main.people.component.PeopleComponent
 import com.example.dantalk.features.main.profile.component.ProfileComponent
 import com.example.feature.main.search.component.SearchComponent
+import com.example.feature.main.settings.component.SettingsComponent
 
 interface MainComponent {
     val stack: Value<ChildStack<*, Child>>
@@ -17,5 +18,6 @@ interface MainComponent {
         class Profile(val component: ProfileComponent) : Child
         class People(val component: PeopleComponent) : Child
         class Chat(val component: ChatComponent) : Child
+        class Settings(val component: SettingsComponent) : Child
     }
 }

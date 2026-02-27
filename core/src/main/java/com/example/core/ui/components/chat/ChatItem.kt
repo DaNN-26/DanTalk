@@ -3,7 +3,6 @@ package com.example.core.ui.components.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
 import com.example.core.ui.model.UiChat
+import com.example.core.util.toDateString
+import kotlin.math.max
 
 @Composable
 fun ChatItem(
@@ -56,7 +61,7 @@ fun ChatItem(
                 model = chat.user.avatar,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(65.dp)
+                    .size(60.dp)
                     .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
@@ -70,15 +75,20 @@ fun ChatItem(
                 ) {
                     Text(
                         text = chat.user.username,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Medium,
                         color = DanTalkTheme.colors.oppositeTheme
                     )
                     Text(
-                        text = chat.lastMessage?.time ?: "",
-                        fontSize = 14.sp,
+                        text = if (chat.lastMessage?.date != System.currentTimeMillis()
+                                .toDateString()
+                        )
+                            chat.lastMessage?.date ?: ""
+                        else chat.lastMessage.time,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
                         color = DanTalkTheme.colors.hint
                     )
                 }
@@ -98,8 +108,8 @@ fun ChatItem(
                                     "Вы: ${lastMsg.message}"
                                 else lastMsg?.message ?: "Нет сообщений",
                                 modifier = Modifier.weight(1f),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
                                 maxLines = 2,
                                 overflow = TextOverflow.Ellipsis,
                                 color = DanTalkTheme.colors.hint
@@ -118,7 +128,7 @@ fun ChatItem(
         }
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 10.dp),
-            color = DanTalkTheme.colors.hint.copy(alpha = 0.3f)
+            color = DanTalkTheme.colors.spacer
         )
     }
 }
@@ -127,31 +137,48 @@ fun ChatItem(
 private fun NewMessagesIndicator(
     amount: Int,
 ) {
-    val horizontalPadding = if (amount <= 9) 10.dp else 6.dp
-
-    Box(
+    val color = DanTalkTheme.colors.main
+    Text(
+        text = if(amount < 1000) amount.toString() else "999+",
         modifier = Modifier
-            .clip(CircleShape)
-            .background(DanTalkTheme.colors.main),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = amount.toString(),
-            modifier = Modifier.padding(horizontal = horizontalPadding, vertical = 6.dp),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White
-        )
-    }
+            .padding(horizontal = 4.dp)
+            .drawBehind {
+                val padding = 8.dp.toPx()
+                val height = this.size.height + padding
+                val width = this.size.width + padding
+
+                if (amount < 10) {
+                    val diameter = max(width, height)
+                    drawCircle(
+                        color = color,
+                        radius = diameter / 2,
+                        center = center
+                    )
+                } else
+                    drawRoundRect(
+                        color = color,
+                        size = Size(width, height),
+                        topLeft = Offset(
+                            (size.width - width) / 2,
+                            (size.height - height) / 2
+                        ),
+                        cornerRadius = CornerRadius(height)
+                    )
+            }
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        fontSize = 12.sp,
+        fontWeight = FontWeight.Medium,
+        color = Color.White
+    )
 }
 
 @Composable
 private fun MessageStatus(
     isRead: Boolean,
-    isPending: Boolean
+    isPending: Boolean,
 ) {
     Icon(
-        imageVector = if(isPending) Icons.Default.Pending else Icons.Default.Check,
+        imageVector = if (isPending) Icons.Default.Pending else Icons.Default.Check,
         contentDescription = null,
         modifier = Modifier.size(18.dp),
         tint = if (!isPending && isRead) DanTalkTheme.colors.main else DanTalkTheme.colors.hint
@@ -178,7 +205,7 @@ private fun LastPhotoMessage(
         )
         Text(
             text = "Изображение",
-            fontSize = 16.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,

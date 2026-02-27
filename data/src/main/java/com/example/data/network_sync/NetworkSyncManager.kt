@@ -1,20 +1,25 @@
 package com.example.data.network_sync
 
-import com.example.core.network_monitor.NetworkMonitor
+import android.content.Context
+import android.util.Log
+import com.example.core.network_observer.observeConnectivityAsFlow
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class NetworkSyncManager(
-    private val networkMonitor: NetworkMonitor,
+    private val context: Context,
     private val firestore: FirebaseFirestore,
 ) {
     fun observeNetworkChanges(scope: CoroutineScope) {
+        context
         scope.launch(Dispatchers.IO) {
-            networkMonitor.networkStatus.collect { isConnected ->
-                if (isConnected)
+            context.observeConnectivityAsFlow().collect { isConnected ->
+                if (isConnected) {
+                    Log.d("NetworkSyncManager", "Network is connected")
                     firestore.enableNetwork()
+                }
                 else
                     firestore.disableNetwork()
             }

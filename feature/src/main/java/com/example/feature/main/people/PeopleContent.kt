@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -43,7 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.example.core.design.theme.DanTalkTheme
+import com.example.core.network_observer.ConnectionState
+import com.example.core.network_observer.connectionState
 import com.example.core.ui.components.ItemShimmer
+import com.example.core.ui.components.NoInternetConnection
 import com.example.core.ui.components.UserDialogInfo
 import com.example.core.ui.components.topbar.SearchTopBar
 import com.example.core.ui.model.UiUserData
@@ -70,6 +71,8 @@ private fun Content(
     var dialogUserData: UiUserData? by remember { mutableStateOf(null) }
     var isDialogVisible by remember { mutableStateOf(false) }
 
+    val connectionState by connectionState()
+
     val context = LocalContext.current
 
     Scaffold(
@@ -82,18 +85,18 @@ private fun Content(
         },
         containerColor = DanTalkTheme.colors.singleTheme
     ) { contentPadding ->
-        when {
-            state.isLoading ->
-                ShimmerContent(Modifier.padding(contentPadding))
+        Box {
+            when {
+                state.isLoading ->
+                    ShimmerContent(Modifier.padding(contentPadding))
 
-            state.query.isNotEmpty() && state.usersByQuery.isEmpty() ->
-                EmptyUsersContent("Ничего не найдено")
+                state.query.isNotEmpty() && state.usersByQuery.isEmpty() ->
+                    EmptyUsersContent("Ничего не найдено")
 
-            state.query.isEmpty() ->
-                EmptyUsersContent("Введите username пользователя,\nкоторого хотите найти")
+                state.query.isEmpty() ->
+                    EmptyUsersContent("Введите username пользователя,\nкоторого хотите найти")
 
-            else ->
-                Box {
+                else -> {
                     if (isDialogVisible) {
                         UserDialogInfo(
                             onDismissRequest = { isDialogVisible = false },
@@ -108,10 +111,12 @@ private fun Content(
                                 onIntent(PeopleStore.Intent.OpenChat(dialogUserData!!.id))
                             },
                             onDownloadButtonClick = {
-                                onIntent(PeopleStore.Intent.DownloadImage(
-                                    context = context,
-                                    url = dialogUserData?.avatar ?: ""
-                                ))
+                                onIntent(
+                                    PeopleStore.Intent.DownloadImage(
+                                        context = context,
+                                        url = dialogUserData?.avatar ?: ""
+                                    )
+                                )
                             },
                             user = dialogUserData ?: UiUserData()
                         )
@@ -124,10 +129,17 @@ private fun Content(
                         },
                         onMessageSendClick = { onIntent(PeopleStore.Intent.OpenChat(it)) },
                         modifier = Modifier
-                            .padding(contentPadding)
                             .blur(if (isDialogVisible) 3.dp else 0.dp)
+                            .padding(contentPadding)
                     )
                 }
+            }
+            if (connectionState is ConnectionState.Unavailable)
+                NoInternetConnection(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(contentPadding)
+                )
         }
     }
 }
@@ -168,7 +180,6 @@ private fun UserItem(
             .clickable { onUserClick() },
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Spacer(Modifier.height(0.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,7 +194,7 @@ private fun UserItem(
                     model = userData.avatar,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(65.dp)
+                        .size(60.dp)
                         .clip(CircleShape),
                     contentScale = ContentScale.Crop
                 )
@@ -192,7 +203,7 @@ private fun UserItem(
                 ) {
                     Text(
                         text = userData.firstname,
-                        fontSize = 18.sp,
+                        fontSize = 16.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         fontWeight = FontWeight.Medium,
@@ -200,9 +211,10 @@ private fun UserItem(
                     )
                     Text(
                         text = userData.username,
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Medium,
                         color = DanTalkTheme.colors.oppositeTheme
                     )
                 }
@@ -210,7 +222,7 @@ private fun UserItem(
             IconButton(
                 onClick = onMessageSendClick,
                 colors = IconButtonDefaults.iconButtonColors(
-                    contentColor = DanTalkTheme.colors.main
+                    contentColor = DanTalkTheme.colors.hint
                 ),
             ) {
                 Icon(
@@ -221,7 +233,7 @@ private fun UserItem(
         }
         HorizontalDivider(
             modifier = Modifier.padding(horizontal = 10.dp),
-            color = DanTalkTheme.colors.hint.copy(alpha = 0.3f)
+            color = DanTalkTheme.colors.spacer
         )
     }
 }
@@ -237,7 +249,7 @@ private fun EmptyUsersContent(
     ) {
         Text(
             text = text,
-            fontSize = 18.sp,
+            fontSize = 16.sp,
             textAlign = TextAlign.Center,
             color = DanTalkTheme.colors.oppositeTheme
         )
